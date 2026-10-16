@@ -255,7 +255,7 @@
                     </Style>
                 </StackPanel.Style>
                 <nwc:SmartSlider x:Name="Slider"
-                        ThumbSize="{Binding Slider.Thickness, Source={x:Static local:Config.Current}}"
+                        ThumbSize="17"
                         ThumbBorderBrush="{DynamicResource BottomBar.Slider.Thumb}"
                         ThumbFillMouseOver="{DynamicResource BottomBar.Slider.Thumb.MouseOver}"
                         TrackDecreaseBrush="{DynamicResource BottomBar.Slider.Track}"

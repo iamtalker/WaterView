@@ -83,6 +83,13 @@ namespace WaterViewLauncher
 
         // ---- self-update ----
 
+        // the launcher's own (water drop) icon, so the small dialogs match the app in the taskbar
+        private static System.Drawing.Icon AppIcon()
+        {
+            try { return System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath); }
+            catch { return null; }
+        }
+
         /// <summary>
         /// Waits for the app to exit, swaps the "app" folder (keeping its Profile folder) and the launcher,
         /// then starts the new version. On failure the previous version is restored.
@@ -93,6 +100,7 @@ namespace WaterViewLauncher
             using (var label = new Label())
             {
                 form.Text = Caption;
+                form.Icon = AppIcon();
                 form.ClientSize = new System.Drawing.Size(340, 64);
                 form.FormBorderStyle = FormBorderStyle.FixedDialog;
                 form.ControlBox = false;
@@ -445,6 +453,7 @@ namespace WaterViewLauncher
             using (var client = new WebClient())
             {
                 form.Text = Caption;
+                form.Icon = AppIcon();
                 form.ClientSize = new System.Drawing.Size(360, 78);
                 form.FormBorderStyle = FormBorderStyle.FixedDialog;
                 form.MaximizeBox = false;

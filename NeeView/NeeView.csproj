@@ -11,7 +11,7 @@
     <ApplicationManifest>App.manifest</ApplicationManifest>
     <ApplicationIcon>Resources\App.ico</ApplicationIcon>
     <AssemblyName>WaterView</AssemblyName>
-    <Version>0.4.6</Version>
+    <Version>0.4.7</Version>
     <AssemblyTitle>물뷰</AssemblyTitle>
     <Platforms>x64</Platforms>
     <Platform>x64</Platform>

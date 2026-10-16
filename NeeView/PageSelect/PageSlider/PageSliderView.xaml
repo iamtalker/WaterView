@@ -46,7 +46,7 @@
 
                 <nwc:SmartSlider x:Name="Slider" Height="{Binding Slider.Thickness, Source={x:Static local:Config.Current}}"
                                  Focusable="False"
-                                 ThumbSize="{Binding Slider.Thickness, Source={x:Static local:Config.Current}}"
+                                 ThumbSize="17"
                                  ThumbBorderBrush="{DynamicResource BottomBar.Slider.Thumb}"
                                  ThumbFillMouseOver="{DynamicResource BottomBar.Slider.Thumb.MouseOver}"
                                  TrackDecreaseBrush="{DynamicResource BottomBar.Slider.Track}"
