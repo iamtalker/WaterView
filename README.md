@@ -2,6 +2,20 @@
 
 만화 보기에 맞춘 이미지 뷰어입니다. 오픈소스 [NeeView](https://github.com/neelabo/NeeView) (MIT, © Ito Mitsuhiro) 를 기반으로, 조작과 화면 구성을 단순한 만화 뷰어 스타일로 바꾼 포크입니다.
 
+<p align="center"><img src="docs/waterview/hero.png" alt="물뷰" width="760"></p>
+
+## 미리보기
+<p align="center">
+  <img src="docs/waterview/reading.png" alt="편하게 넘기기" width="48%">
+  <img src="docs/waterview/toolbar.png" alt="상단 도구 줄" width="48%">
+  <img src="docs/waterview/slideshow.png" alt="슬라이드쇼 간격" width="48%">
+  <img src="docs/waterview/theme.png" alt="테마와 색 편집" width="48%">
+  <img src="docs/waterview/explorer.png" alt="탐색기 우클릭" width="48%">
+  <img src="docs/waterview/no-install.png" alt="설치 없이 실행" width="48%">
+</p>
+
+기능 소개 전체는 [소개글](docs/waterview/intro.ko.md) 을 참고하세요.
+
 ## 바뀐 점
 - 기본 읽기 방향: 왼쪽 → 오른쪽, 휠/방향키/Space/PageDown 으로 쪽 넘김
 - 우클릭 메뉴와 단축키 구성 변경 (열기 F2, 닫기 F4, 파일 정보 Tab, 설정 F5 등)
@@ -11,7 +25,7 @@
 - 앱 이름 "물뷰", 새 아이콘
 
 ## 폴더 구성
-배포 zip 을 풀면 겉에는 `WaterView.exe` 하나만 보이고, 프로그램 본체와 라이브러리는 `app` 폴더 안에 있습니다. `WaterView.exe` 는 `WaterViewLauncher` 프로젝트로 만든 작은 실행기이며 `appWaterView.exe` 를 시작합니다.
+배포 zip 을 풀면 겉에는 `WaterView.exe` 하나만 보이고, 프로그램 본체와 라이브러리는 `app` 폴더 안에 있습니다. `WaterView.exe` 는 `WaterViewLauncher` 프로젝트로 만든 작은 실행기이며 `app\WaterView.exe` 를 시작합니다.
 
 ## 설정
 `F5` 는 자주 쓰는 항목(테마, 배경색, 읽는 방향, 슬라이드쇼 간격, 우클릭 메뉴 등록)만 모은 간단한 설정 창이고, 나머지 모든 설정은 `상세 설정...` 에서 바꿉니다.
