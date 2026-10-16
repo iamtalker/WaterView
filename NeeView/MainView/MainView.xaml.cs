@@ -104,51 +104,8 @@ namespace NeeView
 
             _mainViewCursor.Initialize();
 
-            // welcome image while no book is open
-            BookHub.Current.BookChanged += (s, e) => UpdateWelcome();
-            BookHub.Current.IsLoadingChanged += (s, e) => UpdateWelcome();
-            BookHub.Current.LoadRequested += (s, e) => Dispatcher.BeginInvoke(() =>
-            {
-                // 파일을 읽으라는 요청이 오면 바로 숨긴다
-                _welcomeTimer?.Stop();
-                this.WelcomeView.Visibility = Visibility.Collapsed;
-            });
-            UpdateWelcome();
         }
 
-        private System.Windows.Threading.DispatcherTimer? _welcomeTimer;
-
-        // 책이 없는 상태가 잠깐 생기는 때(시작 직후, 책을 바꾸는 사이)에는 환영 그림을 띄우지 않도록,
-        // 책이 없는 상태가 0.8초 이어졌을 때만 보여준다.
-        private void UpdateWelcome()
-        {
-            Dispatcher.BeginInvoke(() =>
-            {
-                var hub = BookHub.Current;
-                var empty = hub.GetCurrentBook() is null && !hub.IsLoading;
-                if (!empty)
-                {
-                    _welcomeTimer?.Stop();
-                    this.WelcomeView.Visibility = Visibility.Collapsed;
-                    return;
-                }
-
-                if (this.WelcomeView.Visibility == Visibility.Visible) return;
-
-                _welcomeTimer ??= new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromMilliseconds(800) };
-                _welcomeTimer.Tick -= OnWelcomeTimer;
-                _welcomeTimer.Tick += OnWelcomeTimer;
-                _welcomeTimer.Stop();
-                _welcomeTimer.Start();
-            });
-        }
-
-        private void OnWelcomeTimer(object? sender, EventArgs e)
-        {
-            _welcomeTimer?.Stop();
-            var hub = BookHub.Current;
-            this.WelcomeView.Visibility = hub.GetCurrentBook() is null && !hub.IsLoading ? Visibility.Visible : Visibility.Collapsed;
-        }
 
         private void MainView_DataContextChanged(object? sender, DependencyPropertyChangedEventArgs e)
         {

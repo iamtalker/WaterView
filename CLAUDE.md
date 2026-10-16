@@ -28,7 +28,7 @@ dotnet build WaterViewLauncher\WaterViewLauncher.csproj -c Release -o <출력>
 - F5 간단 설정: `NeeView/Setting/QuickSettingsDialog.cs` (전체 설정은 "상세 설정..." = 원래 NeeView 설정 창).
 - 테마/배경색 편집: `NeeView/Styles/ThemeEditing.cs`, `ColorEditing.cs`. 슬라이드쇼 간격 목록: `NeeView/SlideShow/SlideShowIntervalList.cs`.
 - 자동 업데이트: `NeeView/Update/UpdateService.cs` + `WaterViewLauncher/Program.cs`(`--update`). 탐색기 우클릭 등록: `NeeView/System/ExplorerContextMenu.cs`.
-- 시작 지연 수정: `NeeView/System/MultiBootService.cs`. 환영 화면: `MainView.xaml` + `Resources/Welcome.png`.
+- 시작 지연 수정: `NeeView/System/MultiBootService.cs`.
 
 ## 겪은 함정
 - `BackgroundConfig.CustomBackground` 는 객체를 **교체하지 말고 속성을 직접 수정**해야 화면에 반영된다 (감시 대상이 처음 객체).
