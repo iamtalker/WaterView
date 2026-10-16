@@ -149,18 +149,12 @@ namespace NeeView
         {
             if (this.Book == null || this.Book.IsMedia) return;
 
-            var dialogModel = new PageSelectDialogModel((this.Book.CurrentPage?.Index ?? 0) + 1, 1, this.Book.Pages.Count);
-
-            var dialog = new PageSelectDialog(dialogModel);
+            var dialog = new ImageSelectDialog(this.Book.Pages, this.Book.CurrentPage?.Index ?? 0);
             dialog.Owner = MainViewComponent.Current.GetWindow();
             dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
 
-            var result = dialog.ShowDialog();
-
-            if (result == true)
+            if (dialog.ShowDialog() == true && dialog.SelectedPage is { } page)
             {
-                var page = this.Book.Pages.GetPage(dialogModel.Value - 1);
-                if (page is null) return;
                 _control.MoveTo(sender, page.Index);
             }
         }

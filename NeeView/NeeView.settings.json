@@ -7,6 +7,6 @@
   "TrimSaveData": true,
   "PathProcessGroup": true,
   "SoftwareRendering": false,
-  "Watermark": true,
+  "Watermark": false,
   "LogFile": null
 }

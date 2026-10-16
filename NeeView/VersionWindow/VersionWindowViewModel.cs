@@ -22,7 +22,7 @@ namespace NeeView
         }
 
 
-        public string ApplicationName => Environment.ApplicationName;
+        public string ApplicationName => Environment.DisplayName;
         public string DisplayVersion => Environment.DisplayVersion;
         public string LicenseUri { get; private set; }
         public string ProjectUri => "https://neelabo.github.io/NeeView";

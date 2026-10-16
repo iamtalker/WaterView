@@ -10,9 +10,9 @@ namespace NeeView
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
     public partial class PanelsConfig : ObservableObject
     {
-        [DefaultEquality] private bool _isHideLeftPanel;
-        [DefaultEquality] private bool _isHideRightPanel;
-        [DefaultEquality] private bool _isSideBarEnabled = true;
+        [DefaultEquality] private bool _isHideLeftPanel = true;
+        [DefaultEquality] private bool _isHideRightPanel = true;
+        [DefaultEquality] private bool _isSideBarEnabled = false;
         [DefaultEquality] private double _opacity = 1.0;
         [DefaultEquality] private bool _isHideLeftPanelInAutoHideMode = true;
         [DefaultEquality] private bool _isHideRightPanelInAutoHideMode = true;

@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -23,7 +24,7 @@ namespace NeeView
 
         private MainMenu()
         {
-            _mainMenuSource = MenuTree.CreateDefault();
+            _mainMenuSource = MenuTree.CreateMainMenuDefault();
 
             Config.Current.MenuBar.SubscribePropertyChanged(nameof(MenuBarConfig.IsHamburgerMenu),
                 (s, e) => Update());
@@ -68,6 +69,12 @@ namespace NeeView
             items.Add(_debugMenu.CreateDevMenuItem());
 #endif
 
+            // Honeyview-like toolbar: icon + label for the top level items
+            foreach (var topItem in items.OfType<MenuItem>())
+            {
+                AddToolbarIcon(topItem);
+            }
+
             var menu = new Menu();
             if (isHamburgerMenu)
             {
@@ -94,6 +101,46 @@ namespace NeeView
             }
 
             return menu;
+        }
+
+        private static void AddToolbarIcon(MenuItem item)
+        {
+            if (item.Header is not string text) return;
+
+            var key = text switch
+            {
+                _ when text.Contains("정보") => "g_info_24px",
+                _ when text.Contains("보기 모드") => "g_crop_original_24px",
+                _ when text.Contains("슬라이드") => "g_slideshow_24px",
+                _ when text.Contains("책갈피") => "g_bookmark_24px",
+                _ when text.Contains("편집") => "g_content_copy_24px",
+                _ when text.Contains("위에") => "g_push_pin_24px",
+                _ when text == "메뉴" => "g_menu_24px",
+                _ => null,
+            };
+            if (key is null || App.Current.Resources[key] is not Geometry geometry) return;
+
+            var icon = new System.Windows.Shapes.Path
+            {
+                Data = geometry,
+                Width = 15,
+                Height = 15,
+                Stretch = Stretch.Uniform,
+                Margin = new Thickness(0, 0, 5, 0),
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            BindingOperations.SetBinding(icon, System.Windows.Shapes.Shape.FillProperty,
+                new Binding(nameof(Control.Foreground)) { RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(MenuItem), 1) });
+
+            var panel = new StackPanel { Orientation = Orientation.Horizontal };
+            panel.Children.Add(icon);
+            var label = text.Contains("정보") ? "EXIF" : text;
+            panel.Children.Add(new AccessText { Text = label, VerticalAlignment = VerticalAlignment.Center });
+            if (item.Items.Count > 0)
+            {
+                panel.Children.Add(new TextBlock { Text = "▾", Margin = new Thickness(4, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center });
+            }
+            item.Header = panel;
         }
 
         /// <summary>

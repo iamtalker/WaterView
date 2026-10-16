@@ -547,10 +547,7 @@ namespace NeeView
             Trace.WriteLine("App.MainWindow.ContentRendered Done");
 
             // 初回起動ダイアログ
-            if (!Config.Current.System.IsLoadedSettings)
-            {
-                WelcomeDialog.ShowDialog(this);
-            }
+            // The welcome dialog is skipped: Honeyview-like defaults are applied as is.
         }
 
         // ウィンドウアクティブ

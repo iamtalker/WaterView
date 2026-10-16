@@ -17,7 +17,7 @@ namespace NeeView
 
         private ContextMenuSource()
         {
-            _menuTree = MenuTree.CreateDefault();
+            _menuTree = MenuTree.CreateContextMenuDefault();
             AttachSourceTree(_menuTree);
         }
 
@@ -67,7 +67,7 @@ namespace NeeView
 
         public MenuNode? CreateContextMenuNode()
         {
-            if (MenuTree.IsEqual(MenuTree.CreateDefault()))
+            if (MenuTree.IsEqual(MenuTree.CreateContextMenuDefault()))
             {
                 return null;
             }
@@ -84,7 +84,7 @@ namespace NeeView
         {
             if (contextMenuNode is null)
             {
-                MenuTree = MenuTree.CreateDefault();
+                MenuTree = MenuTree.CreateContextMenuDefault();
             }
             else
             {

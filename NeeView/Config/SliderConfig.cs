@@ -11,7 +11,7 @@ namespace NeeView
     public partial class SliderConfig : ObservableObject
     {
         [IgnoreEquality] private bool _isVisible;
-        [DefaultEquality] private bool _isIsHidePageSlider;
+        [DefaultEquality] private bool _isIsHidePageSlider = true;
         [DefaultEquality] private double _sliderOpacity = 1.0;
         [DefaultEquality] private SliderIndexLayout _sliderIndexLayout = SliderIndexLayout.Right;
         [DefaultEquality] private SliderDirection _sliderDirection = SliderDirection.SyncBookReadDirection;

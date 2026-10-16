@@ -10,7 +10,7 @@
         Style="{StaticResource ChromeDialogStyle}" 
         UseLayoutRounding="True"
         KeyDown="MessageDialog_KeyDown"
-        Title="NeeView" SizeToContent="Height" Width="600" ResizeMode="NoResize">
+        Title="물뷰" SizeToContent="Height" Width="600" ResizeMode="NoResize">
 
     <Grid MinWidth="480" MaxWidth="800">
         <DockPanel  Margin="40,20" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">

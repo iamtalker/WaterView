@@ -19,7 +19,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Description>Image viewer</Description>
+    <Description>물뷰 - 만화 뷰어 (based on NeeView, MIT)</Description>
+    <Product>물뷰</Product>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Remote'">

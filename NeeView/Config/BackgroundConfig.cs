@@ -8,8 +8,8 @@ namespace NeeView
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
     public partial class BackgroundConfig : ObservableObject
     {
-        [DefaultEquality] private BackgroundType _backgroundType = BackgroundType.Black;
-        [DefaultEquality] private BrushSource _customBackground = new();
+        [DefaultEquality] private BackgroundType _backgroundType = BackgroundType.Custom;
+        [DefaultEquality] private BrushSource _customBackground = new() { Color = Color.FromRgb(0x20, 0x20, 0x20) };
         [DefaultEquality] private Color _pageBackgroundColor = Colors.Transparent;
         [DefaultEquality] private bool _isPageBackgroundChecker;
 

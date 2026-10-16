@@ -11,7 +11,7 @@ namespace NeeView
     {
         [DefaultEquality] private string _page = "";
         [DefaultEquality] private PageMode _pageMode = PageMode.SinglePage;
-        [DefaultEquality] private PageReadOrder _bookReadOrder = PageReadOrder.RightToLeft;
+        [DefaultEquality] private PageReadOrder _bookReadOrder = PageReadOrder.LeftToRight;
         [DefaultEquality] private bool _isSupportedDividePage;
         [DefaultEquality] private bool _isSupportedSingleFirstPage;
         [DefaultEquality] private bool _isSupportedSingleLastPage;

@@ -437,7 +437,18 @@ namespace NeeView
                 collection.Add(element.Key, element.Value.DefaultMemento);
             }
             _baseCollection = collection;
-            _defaultCollection = new DefaultCommandCollection(InputScheme.TypeA, PageReadOrder.RightToLeft, _baseCollection);
+            var presetInputScheme = InputScheme.TypeB;
+            var presetPageReadOrder = PageReadOrder.LeftToRight;
+            var presetMemento = CreateDefaultMemento(presetInputScheme, presetPageReadOrder);
+            _defaultCollection = new DefaultCommandCollection(presetInputScheme, presetPageReadOrder, presetMemento);
+            UpdateDefaultCommandElement(presetMemento);
+            foreach (var pair in presetMemento)
+            {
+                if (_elements.TryGetValue(pair.Key, out var presetElement))
+                {
+                    presetElement.Restore(pair.Value);
+                }
+            }
 
             // 廃棄されたコマンドの情報。代替コマンドあり。
             var alternativeCommands = new List<ObsoleteCommandItem>()
@@ -619,8 +630,9 @@ namespace NeeView
         /// </summary>
         private CommandCollection GetDefaultMemento()
         {
-            var inputScheme = Config.Current.Command.PresetInputScheme;
-            var pageReadOrder = Config.Current.Command.PresetPageReadOrder;
+            // Honeyview-like preset is fixed: the saved preset value is reset to TypeA while settings are restored.
+            var inputScheme = InputScheme.TypeB;
+            var pageReadOrder = PageReadOrder.LeftToRight;
 
             // プロパティが異なる場合は再生成
             if (_defaultCollection is null || _defaultCollection.InputScheme != inputScheme || _defaultCollection.PageReadOrder != pageReadOrder)
@@ -698,7 +710,37 @@ namespace NeeView
                 }
             }
 
+            // Honeyview-like keys: wheel/click/arrows move pages, right click opens the context menu
+            memento["NextScrollPage"].ShortCutKey = "";
+            memento["PrevScrollPage"].ShortCutKey = "";
+            memento["NextPage"].ShortCutKey = "Right,WheelDown,Space,PageDown,LeftClick";
+            memento["PrevPage"].ShortCutKey = "Left,WheelUp,Back,PageUp";
+            memento["OpenContextMenu"].ShortCutKey = "RightClick";
+            memento["PrevHistoryPage"].ShortCutKey = "";
+            AddShortCutKey(memento, "FirstPage", "Home");
+            AddShortCutKey(memento, "LastPage", "End");
+            AddShortCutKey(memento, "LoadAs", "F2");
+            AddShortCutKey(memento, "Unload", "F4");
+            AddShortCutKey(memento, "OpenExplorer", "Ctrl+Enter");
+            AddShortCutKey(memento, "JumpPage", "Enter");
+            AddShortCutKey(memento, "ToggleVisibleFileInfo", "Tab");
+            AddShortCutKey(memento, "OpenVersionWindow", "F1");
+            AddShortCutKey(memento, "CloseApplication", "X");
+            memento["ToggleSlideShow"].ShortCutKey = "F6";
+            memento["ToggleFullScreen"].ShortCutKey = "F11";
+            memento["OpenOptionsWindow"].ShortCutKey = "F5";
+            memento["ToggleEffect"].ShortCutKey = "";
+            memento["OpenExternalApp"].ShortCutKey = "Ctrl+E";
+            memento["CopyImage"].ShortCutKey = "Ctrl+C";
+            memento["CopyFile"].ShortCutKey = "Ctrl+Shift+C";
+
             return memento;
+
+            static void AddShortCutKey(CommandCollection collection, string name, string keys)
+            {
+                var current = collection[name].ShortCutKey;
+                collection[name].ShortCutKey = string.IsNullOrEmpty(current) ? keys : current + "," + keys;
+            }
 
             static string? ReplaceSwapWheelGesture(string? s)
             {

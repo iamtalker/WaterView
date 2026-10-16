@@ -1,3 +1,31 @@
+# 물뷰 (WaterView)
+
+만화 보기에 맞춘 이미지 뷰어입니다. 오픈소스 [NeeView](https://github.com/neelabo/NeeView) (MIT, © Ito Mitsuhiro) 를 기반으로, 조작과 화면 구성을 단순한 만화 뷰어 스타일로 바꾼 포크입니다.
+
+## 바뀐 점
+- 기본 읽기 방향: 왼쪽 → 오른쪽, 휠/방향키/Space/PageDown 으로 쪽 넘김
+- 우클릭 메뉴와 단축키 구성 변경 (열기 F2, 닫기 F4, 파일 정보 Tab, 설정 F5 등)
+- Enter: "이미지 선택" 창 (미리보기 + 파일 목록 + 정렬)
+- 어두운 회색 배경, 패널/슬라이더/주소창 기본 숨김
+- 상단 아이콘 도구 줄 (EXIF, 보기 모드, 슬라이드쇼, 책갈피, 편집, 항상 위에 표시, 메뉴)
+- 앱 이름 "물뷰", 새 아이콘
+
+## 실행 환경
+Windows 10/11 x64, [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)
+
+## 빌드
+```
+git clone --recurse-submodules https://github.com/iamtalker/WaterView.git
+cd WaterView
+dotnet build NeeView\NeeView.csproj -c Release
+```
+
+## 라이선스
+MIT License (NeeView 의 `LICENSE.md` 를 그대로 유지합니다). 서드파티 라이선스는 `THIRDPARTY_LICENSES.md` 를 참고하세요.
+이 프로젝트는 특정 상용 뷰어와 무관하며, 다른 프로그램의 코드·아이콘·이미지를 사용하지 않았습니다. 화면 구성은 일반적인 만화 뷰어의 사용 방식을 참고했습니다.
+
+---
+
 # <img src="docs/assets/images/AppIcon.png" align="absmiddle"/>  NeeView
 
 **[NeeView Portal Site (English/日本語)](https://neelabo.github.io/NeeView)**

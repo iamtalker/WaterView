@@ -10,7 +10,7 @@
 
     <tb:TaskbarIcon x:Key="TaskTrayIcon" x:Shared="false"
         IconSource="/Resources/App.ico"
-        ToolTipText="NeeView"
+        ToolTipText="물뷰"
         LeftClickCommand="{Binding ShowWindowCommand}"
         DoubleClickCommand="{Binding ShowWindowCommand}"
         ContextMenu="{StaticResource SysTrayMenu}">

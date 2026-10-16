@@ -112,6 +112,11 @@ namespace NeeView
         public static string ApplicationName => AssemblyTitle;
 
         /// <summary>
+        /// 表示用アプリ名 (settings format keeps using ApplicationName)
+        /// </summary>
+        public static string DisplayName => "물뷰";
+
+        /// <summary>
         /// プロダクトバージョン (Major.Minor.Build)
         /// </summary>
         public static string ProductVersion { get; private set; }

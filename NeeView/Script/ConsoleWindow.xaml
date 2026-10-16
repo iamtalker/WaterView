@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:NeeView"
         mc:Ignorable="d"
         Style="{StaticResource ChromeDialogStyle}"
-        Title="NeeView Console" Height="450" Width="800">
+        Title="물뷰 Console" Height="450" Width="800">
     <Grid>
         <local:ConsoleEmulator x:Name="Console" Prompt="&gt; " FirstMessage="NeeView script console&#xD;&#xA;" />
         

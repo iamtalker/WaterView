@@ -7,8 +7,8 @@ namespace NeeView
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
     public partial class WindowTitleConfig : ObservableObject
     {
-        private const string WindowTitleFormat1Default = "{Book} ({Page}{Part: (#)} / {PageMax}) - {EntryPath:/ > }";
-        private const string WindowTitleFormat2Default = "{Book} ({Page}{Part: (#)} / {PageMax}) - {EntryPathL:/ > } | {NameR}";
+        private const string WindowTitleFormat1Default = "{Book} - {EntryPath:/ > } [{Page}{Part: (#)}/{PageMax}]";
+        private const string WindowTitleFormat2Default = "{Book} - {EntryPathL:/ > } | {NameR} [{Page}{Part: (#)}/{PageMax}]";
         private const string WindowTitleFormatMediaDefault = "{Book}";
 
         [DefaultEquality] private string? _windowTitleFormat1;

@@ -261,6 +261,152 @@ namespace NeeView
         }
 
 
+        /// <summary>
+        /// Honeyview-like top toolbar menu (view mode, slideshow, bookmark, edit, pin)
+        /// </summary>
+        public static MenuTree CreateMainMenuDefault()
+        {
+            static TreeListNode<MenuElement> Cmd(string name) => new(new CommandMenuElement() { CommandName = name });
+            static TreeListNode<MenuElement> Sep() => new(new SeparatorMenuElement());
+
+            var root = new TreeListNode<MenuElement>(new GroupMenuElement())
+            {
+                Cmd("ToggleVisibleFileInfo"),
+                new(new GroupMenuElement() { Name = "보기 모드" })
+                {
+                    Cmd("SetPageModeOne"),
+                    Cmd("SetPageModeTwo"),
+                    Sep(),
+                    Cmd("SetStretchModeNone"),
+                    Cmd("SetStretchModeUniform"),
+                    Cmd("SetStretchModeUniformToFill"),
+                    Cmd("SetStretchModeUniformToVertical"),
+                    Cmd("SetStretchModeUniformToHorizontal"),
+                    Sep(),
+                    Cmd("SetBookReadOrderRight"),
+                    Cmd("SetBookReadOrderLeft"),
+                    Sep(),
+                    Cmd("ToggleFullScreen"),
+                },
+                Cmd("ToggleSlideShow"),
+                new(new GroupMenuElement() { Name = "책갈피" })
+                {
+                    Cmd("ToggleBookmark"),
+                    Cmd("ToggleVisibleBookmarkList"),
+                },
+                new(new GroupMenuElement() { Name = "편집" })
+                {
+                    Cmd("CopyImage"),
+                    Cmd("CopyFile"),
+                    Cmd("ExportImageAs"),
+                    Sep(),
+                    Cmd("OpenExternalApp"),
+                    Cmd("Print"),
+                    Sep(),
+                    Cmd("DeleteFile"),
+                },
+                Cmd("ToggleTopmost"),
+            };
+
+            // keep the standard NeeView menus reachable under one group
+            var allMenus = new TreeListNode<MenuElement>(new GroupMenuElement() { Name = "메뉴" });
+            foreach (var node in CreateDefault().Root.CloneChildren())
+            {
+                node.RemoveSelf();
+                allMenus.Add(node);
+            }
+            root.Add(allMenus);
+
+            var tree = new MenuTree(root);
+            CheckCommandEntry(tree);
+            return tree;
+        }
+
+        /// <summary>
+        /// Honeyview-like right click menu
+        /// </summary>
+        public static MenuTree CreateContextMenuDefault()
+        {
+            static TreeListNode<MenuElement> Cmd(string name) => new(new CommandMenuElement() { CommandName = name });
+            static TreeListNode<MenuElement> Sep() => new(new SeparatorMenuElement());
+            static TreeListNode<MenuElement> Group(string name) => new(new GroupMenuElement() { Name = name });
+
+            var root = new TreeListNode<MenuElement>(new GroupMenuElement())
+            {
+                Cmd("LoadAs"),
+                Cmd("LoadRecentBook"),
+                Cmd("Unload"),
+                Cmd("ToggleVisiblePageList"),
+                Cmd("OpenExplorer"),
+                Sep(),
+                Cmd("ToggleNearestNeighbor"),
+                Sep(),
+                new(new GroupMenuElement() { Name = "이미지 이동" })
+                {
+                    Cmd("NextPage"),
+                    Cmd("PrevPage"),
+                    Cmd("NextOnePage"),
+                    Cmd("PrevOnePage"),
+                    Cmd("FirstPage"),
+                    Cmd("LastPage"),
+                    Sep(),
+                    Cmd("NextBook"),
+                    Cmd("PrevBook"),
+                },
+                new(new GroupMenuElement() { Name = "정렬 기준" })
+                {
+                    Cmd("SetSortModeFileName"),
+                    Cmd("SetSortModeFileNameDescending"),
+                    Cmd("SetSortModeTimeStamp"),
+                    Cmd("SetSortModeTimeStampDescending"),
+                    Cmd("SetSortModeSize"),
+                    Cmd("SetSortModeSizeDescending"),
+                    Cmd("SetSortModeEntry"),
+                    Cmd("SetSortModeRandom"),
+                },
+                Sep(),
+                new(new GroupMenuElement() { Name = "보기 모드" })
+                {
+                    Cmd("SetPageModeOne"),
+                    Cmd("SetPageModeTwo"),
+                    Sep(),
+                    Cmd("SetPageOrientationHorizontal"),
+                    Cmd("SetPageOrientationVertical"),
+                    Sep(),
+                    Cmd("SetBookReadOrderRight"),
+                    Cmd("SetBookReadOrderLeft"),
+                    Sep(),
+                    Cmd("ToggleFullScreen"),
+                    Cmd("ToggleSlideShow"),
+                },
+                new(new GroupMenuElement() { Name = "축소/확대 보기" })
+                {
+                    Cmd("SetStretchModeNone"),
+                    Cmd("SetStretchModeUniform"),
+                    Cmd("SetStretchModeUniformToFill"),
+                    Cmd("SetStretchModeUniformToVertical"),
+                    Cmd("SetStretchModeUniformToHorizontal"),
+                    Sep(),
+                    Cmd("ToggleStretchAllowScaleUp"),
+                    Cmd("ToggleStretchAllowScaleDown"),
+                },
+                Sep(),
+                Cmd("ToggleVisibleFileInfo"),
+                Cmd("DeleteFile"),
+                Cmd("OpenExternalApp"),
+                Cmd("Print"),
+                Cmd("CopyImage"),
+                Sep(),
+                Cmd("OpenOptionsWindow"),
+                Cmd("OpenVersionWindow"),
+                Cmd("CloseApplication"),
+            };
+
+            var tree = new MenuTree(root);
+            CheckCommandEntry(tree);
+            return tree;
+        }
+
         private void RemoveCommand(string commandName)
         {
             var removes = this.Root.WalkChildren().Where(e => e.Value.MenuElementType == MenuElementType.Command && e.Value.CommandName == commandName).ToList();
