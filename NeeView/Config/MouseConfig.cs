@@ -31,6 +31,15 @@ namespace NeeView
         [DefaultEquality] private bool _isMouseWheelScrollEnabled;
         [DefaultEquality] private double _mouseWheelScrollSensitivity = 1.0;
         [DefaultEquality] private double _mouseWheelScrollDuration = 0.2;
+        [DefaultEquality] private bool _isClickPageTurnByArea = true;
+
+
+        // 왼쪽 클릭: 화면 왼쪽 절반은 왼쪽 방향, 오른쪽 절반은 오른쪽 방향으로 쪽 넘김 (읽는 방향에 따라 이전/다음이 바뀜)
+        public bool IsClickPageTurnByArea
+        {
+            get { return _isClickPageTurnByArea; }
+            set { SetProperty(ref _isClickPageTurnByArea, value); }
+        }
 
 
         // マウスジェスチャー有効

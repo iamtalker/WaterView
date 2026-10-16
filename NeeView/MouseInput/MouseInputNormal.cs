@@ -207,12 +207,39 @@ namespace NeeView
 
             if (!_isButtonDown) return;
 
+            if (TryTurnPageByClickArea(sender, e))
+            {
+                _isButtonDown = false;
+                return;
+            }
+
             // コマンド決定
             // 離されたボタンがメインキー、それ以外は装飾キー
             MouseButtonChanged?.Invoke(sender, e);
 
             // その後の操作は全て無効
             _isButtonDown = false;
+        }
+
+        /// <summary>
+        /// 왼쪽 클릭 위치로 쪽 넘김. 화면 왼쪽 절반 = 왼쪽 방향, 오른쪽 절반 = 오른쪽 방향.
+        /// 오른쪽에서 왼쪽으로 읽는 책은 왼쪽이 다음 쪽, 왼쪽에서 오른쪽으로 읽는 책은 왼쪽이 이전 쪽.
+        /// </summary>
+        private bool TryTurnPageByClickArea(object? sender, MouseButtonEventArgs e)
+        {
+            if (!Config.Current.Mouse.IsClickPageTurnByArea) return false;
+            if (e.ChangedButton != MouseButton.Left || e.StylusDevice != null) return false;
+            if (Keyboard.Modifiers != ModifierKeys.None) return false;
+            if (sender is not FrameworkElement element || element.ActualWidth <= 0) return false;
+            if (BookOperation.Current.Book is null) return false;
+
+            var isLeft = e.GetPosition(element).X < element.ActualWidth / 2.0;
+            var rightToLeft = BookSettings.Current.BookReadOrder == PageReadOrder.RightToLeft;
+            var next = isLeft == rightToLeft;
+
+            CommandTable.Current.TryExecute(sender, next ? "NextPage" : "PrevPage", null, CommandOption.None);
+            e.Handled = true;
+            return true;
         }
 
         /// <summary>
