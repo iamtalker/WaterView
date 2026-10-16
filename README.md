@@ -40,6 +40,12 @@ cd WaterView
 dotnet build NeeView\NeeView.csproj -c Release
 ```
 
+배포용(미리 컴파일되어 시작이 더 빠른 빌드)은 `dotnet publish` 로 만듭니다.
+```
+dotnet publish NeeView\NeeView.csproj -c Release -r win-x64 --self-contained false -o publish
+```
+겉의 `WaterView.exe` 실행기는 `WaterViewLauncher` 프로젝트(`dotnet build -c Release`)로 만들고, 위 `publish` 폴더 내용을 `app` 폴더에 넣어 함께 묶습니다.
+
 ## 라이선스
 MIT License (NeeView 의 `LICENSE.md` 를 그대로 유지합니다). 서드파티 라이선스는 `THIRDPARTY_LICENSES.md` 를 참고하세요.
 이 프로젝트는 특정 상용 뷰어와 무관하며, 다른 프로그램의 코드·아이콘·이미지를 사용하지 않았습니다. 화면 구성은 일반적인 만화 뷰어의 사용 방식을 참고했습니다.
