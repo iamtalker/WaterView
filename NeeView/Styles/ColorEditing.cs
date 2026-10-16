@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace NeeView
 {
@@ -60,23 +61,37 @@ namespace NeeView
         }
     }
 
+
     /// <summary>
-    /// A color chooser with RGB sliders, a hex field and a preview swatch.
+    /// A color chooser with a large saturation/brightness square, a hue bar, a hex field and old/new swatches.
     /// </summary>
     public class ColorPickerDialog : Window
     {
-        private readonly Slider _red = new() { Minimum = 0, Maximum = 255, TickFrequency = 1, IsSnapToTickEnabled = true };
-        private readonly Slider _green = new() { Minimum = 0, Maximum = 255, TickFrequency = 1, IsSnapToTickEnabled = true };
-        private readonly Slider _blue = new() { Minimum = 0, Maximum = 255, TickFrequency = 1, IsSnapToTickEnabled = true };
+        private const double FieldWidth = 240;
+        private const double FieldHeight = 190;
+        private const double HueHeight = 18;
+
+        private readonly Rectangle _hueLayer = new() { Width = FieldWidth, Height = FieldHeight };
+        private readonly Canvas _fieldCanvas = new() { Width = FieldWidth, Height = FieldHeight, Background = Brushes.Transparent, Cursor = Cursors.Cross, ClipToBounds = true };
+        private readonly Ellipse _fieldMarker = new() { Width = 14, Height = 14, Stroke = Brushes.White, StrokeThickness = 2, IsHitTestVisible = false };
+        private readonly Ellipse _fieldMarkerOuter = new() { Width = 16, Height = 16, Stroke = Brushes.Black, StrokeThickness = 1, IsHitTestVisible = false };
+        private readonly Canvas _hueCanvas = new() { Width = FieldWidth, Height = HueHeight, Background = Brushes.Transparent, Cursor = Cursors.Hand };
+        private readonly Rectangle _hueMarker = new() { Width = 4, Height = HueHeight + 4, Stroke = Brushes.White, StrokeThickness = 1.5, Fill = Brushes.Black, IsHitTestVisible = false };
         private readonly TextBox _hex = new() { Width = 90 };
-        private readonly Border _swatch = new() { Width = 60, Height = 40, BorderBrush = Brushes.Gray, BorderThickness = new Thickness(1) };
+        private readonly Border _newSwatch = new() { Width = 56, Height = 32, BorderBrush = Brushes.Gray, BorderThickness = new Thickness(1) };
+        private readonly Border _oldSwatch = new() { Width = 56, Height = 32, BorderBrush = Brushes.Gray, BorderThickness = new Thickness(1) };
+
+        private double _hue;        // 0..360
+        private double _saturation; // 0..1
+        private double _value;      // 0..1
         private bool _isUpdating;
+        private bool _isDraggingField;
+        private bool _isDraggingHue;
 
         private ColorPickerDialog(Window? owner, Color initial, string title)
         {
             Title = title;
-            Width = 340;
-            SizeToContent = SizeToContent.Height;
+            SizeToContent = SizeToContent.WidthAndHeight;
             ResizeMode = ResizeMode.NoResize;
             ShowInTaskbar = false;
             Owner = owner;
@@ -84,56 +99,90 @@ namespace NeeView
             SetResourceReference(BackgroundProperty, "Panel.Background");
             SetResourceReference(ForegroundProperty, "Window.Foreground");
 
-            var grid = new Grid { Margin = new Thickness(16, 12, 16, 8) };
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(24) });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-            void AddSlider(int row, string label, Slider slider)
+            // saturation (left->right: white->hue) and brightness (top->bottom: transparent->black) layers
+            var fieldGrid = new Grid { Width = FieldWidth, Height = FieldHeight };
+            fieldGrid.Children.Add(_hueLayer);
+            fieldGrid.Children.Add(new Rectangle
             {
-                grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                var text = new TextBlock { Text = label, VerticalAlignment = VerticalAlignment.Center };
-                Grid.SetRow(text, row);
-                grid.Children.Add(text);
-                slider.Margin = new Thickness(0, 6, 0, 6);
-                Grid.SetRow(slider, row);
-                Grid.SetColumn(slider, 1);
-                grid.Children.Add(slider);
-                slider.ValueChanged += (s, e) => OnSliderChanged();
+                Width = FieldWidth,
+                Height = FieldHeight,
+                Fill = new LinearGradientBrush(Colors.White, Colors.Transparent, new Point(0, 0), new Point(1, 0)),
+            });
+            fieldGrid.Children.Add(new Rectangle
+            {
+                Width = FieldWidth,
+                Height = FieldHeight,
+                Fill = new LinearGradientBrush(Colors.Transparent, Colors.Black, new Point(0, 0), new Point(0, 1)),
+            });
+            _fieldCanvas.Children.Add(_fieldMarkerOuter);
+            _fieldCanvas.Children.Add(_fieldMarker);
+            fieldGrid.Children.Add(_fieldCanvas);
+            var fieldBorder = new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(1), Child = fieldGrid, HorizontalAlignment = HorizontalAlignment.Left };
+
+            // hue bar
+            var rainbow = new LinearGradientBrush { StartPoint = new Point(0, 0), EndPoint = new Point(1, 0) };
+            for (var i = 0; i <= 6; i++)
+            {
+                rainbow.GradientStops.Add(new GradientStop(FromHsv(i * 60.0, 1, 1), i / 6.0));
             }
-            AddSlider(0, "R", _red);
-            AddSlider(1, "G", _green);
-            AddSlider(2, "B", _blue);
+            var hueGrid = new Grid { Width = FieldWidth, Height = HueHeight, Margin = new Thickness(0, 10, 0, 0) };
+            hueGrid.Children.Add(new Rectangle { Width = FieldWidth, Height = HueHeight, Fill = rainbow });
+            _hueCanvas.Children.Add(_hueMarker);
+            hueGrid.Children.Add(_hueCanvas);
+            var hueBorder = new Border { BorderBrush = Brushes.Gray, BorderThickness = new Thickness(1), Child = hueGrid, HorizontalAlignment = HorizontalAlignment.Left, Margin = new Thickness(0, 10, 0, 0) };
+            hueGrid.Margin = new Thickness(0);
 
-            var hexPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(16, 4, 16, 4) };
-            hexPanel.Children.Add(_swatch);
-            hexPanel.Children.Add(new TextBlock { Text = "  색 코드  ", VerticalAlignment = VerticalAlignment.Center });
+            // swatches and hex
+            var swatches = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 12, 0, 0) };
+            var oldPanel = new StackPanel { Margin = new Thickness(0, 0, 8, 0) };
+            oldPanel.Children.Add(new TextBlock { Text = "이전", FontSize = 11, Opacity = 0.7 });
+            oldPanel.Children.Add(_oldSwatch);
+            var newPanel = new StackPanel { Margin = new Thickness(0, 0, 14, 0) };
+            newPanel.Children.Add(new TextBlock { Text = "현재", FontSize = 11, Opacity = 0.7 });
+            newPanel.Children.Add(_newSwatch);
+            var hexPanel = new StackPanel { VerticalAlignment = VerticalAlignment.Bottom };
+            hexPanel.Children.Add(new TextBlock { Text = "색 코드", FontSize = 11, Opacity = 0.7 });
             hexPanel.Children.Add(_hex);
+            swatches.Children.Add(oldPanel);
+            swatches.Children.Add(newPanel);
+            swatches.Children.Add(hexPanel);
 
-            var ok = new Button { Content = "확인", Width = 70, IsDefault = true, Margin = new Thickness(0, 0, 8, 0) };
-            var cancel = new Button { Content = "취소", Width = 70, IsCancel = true };
-            var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(16, 4, 16, 12) };
+            var padding = new Thickness(14, 3, 14, 3);
+            var ok = new Button { Content = "확인", MinWidth = 70, Padding = padding, IsDefault = true, Margin = new Thickness(0, 0, 8, 0) };
+            var cancel = new Button { Content = "취소", MinWidth = 70, Padding = padding, IsCancel = true };
+            var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 14, 0, 0) };
             buttons.Children.Add(ok);
             buttons.Children.Add(cancel);
 
-            var root = new DockPanel();
-            DockPanel.SetDock(buttons, Dock.Bottom);
-            DockPanel.SetDock(hexPanel, Dock.Bottom);
+            var root = new StackPanel { Margin = new Thickness(16, 14, 16, 14) };
+            root.Children.Add(fieldBorder);
+            root.Children.Add(hueBorder);
+            root.Children.Add(swatches);
             root.Children.Add(buttons);
-            root.Children.Add(hexPanel);
-            root.Children.Add(grid);
             Content = root;
+
+            // field: drag to choose saturation / brightness
+            _fieldCanvas.MouseLeftButtonDown += (s, e) => { _isDraggingField = true; _fieldCanvas.CaptureMouse(); UpdateFromField(e.GetPosition(_fieldCanvas)); };
+            _fieldCanvas.MouseMove += (s, e) => { if (_isDraggingField) UpdateFromField(e.GetPosition(_fieldCanvas)); };
+            _fieldCanvas.MouseLeftButtonUp += (s, e) => { _isDraggingField = false; _fieldCanvas.ReleaseMouseCapture(); };
+
+            // hue bar: drag to choose hue
+            _hueCanvas.MouseLeftButtonDown += (s, e) => { _isDraggingHue = true; _hueCanvas.CaptureMouse(); UpdateFromHue(e.GetPosition(_hueCanvas)); };
+            _hueCanvas.MouseMove += (s, e) => { if (_isDraggingHue) UpdateFromHue(e.GetPosition(_hueCanvas)); };
+            _hueCanvas.MouseLeftButtonUp += (s, e) => { _isDraggingHue = false; _hueCanvas.ReleaseMouseCapture(); };
 
             _hex.TextChanged += (s, e) =>
             {
                 if (_isUpdating) return;
                 if (ColorEditing.TryParse(_hex.Text, out var parsed))
                 {
-                    SetColor(parsed, updateHex: false);
+                    SetFromColor(parsed, updateHex: false);
                 }
             };
             ok.Click += (s, e) => DialogResult = true;
 
-            SetColor(initial, updateHex: true);
+            _oldSwatch.Background = new SolidColorBrush(Color.FromRgb(initial.R, initial.G, initial.B));
+            SetFromColor(initial, updateHex: true);
         }
 
         public Color SelectedColor { get; private set; }
@@ -145,26 +194,45 @@ namespace NeeView
             return dialog.ShowDialog() == true ? dialog.SelectedColor : null;
         }
 
-        private void OnSliderChanged()
+        private void UpdateFromField(Point point)
         {
-            if (_isUpdating) return;
-            SetColor(Color.FromRgb((byte)_red.Value, (byte)_green.Value, (byte)_blue.Value), updateHex: true, updateSliders: false);
+            _saturation = Math.Clamp(point.X / FieldWidth, 0, 1);
+            _value = 1.0 - Math.Clamp(point.Y / FieldHeight, 0, 1);
+            Apply(updateHex: true);
         }
 
-        private void SetColor(Color color, bool updateHex, bool updateSliders = true)
+        private void UpdateFromHue(Point point)
+        {
+            _hue = Math.Clamp(point.X / FieldWidth, 0, 1) * 360.0;
+            Apply(updateHex: true);
+        }
+
+        private void SetFromColor(Color color, bool updateHex)
+        {
+            ToHsv(color, out _hue, out _saturation, out _value);
+            Apply(updateHex);
+        }
+
+        private void Apply(bool updateHex)
         {
             _isUpdating = true;
             try
             {
-                color = Color.FromRgb(color.R, color.G, color.B);
+                var color = FromHsv(_hue, _saturation, _value);
                 SelectedColor = color;
-                _swatch.Background = new SolidColorBrush(color);
-                if (updateSliders)
-                {
-                    _red.Value = color.R;
-                    _green.Value = color.G;
-                    _blue.Value = color.B;
-                }
+                _newSwatch.Background = new SolidColorBrush(color);
+                _hueLayer.Fill = new SolidColorBrush(FromHsv(_hue, 1, 1));
+
+                var x = _saturation * FieldWidth;
+                var y = (1.0 - _value) * FieldHeight;
+                Canvas.SetLeft(_fieldMarker, x - _fieldMarker.Width / 2);
+                Canvas.SetTop(_fieldMarker, y - _fieldMarker.Height / 2);
+                Canvas.SetLeft(_fieldMarkerOuter, x - _fieldMarkerOuter.Width / 2);
+                Canvas.SetTop(_fieldMarkerOuter, y - _fieldMarkerOuter.Height / 2);
+
+                Canvas.SetLeft(_hueMarker, _hue / 360.0 * FieldWidth - _hueMarker.Width / 2);
+                Canvas.SetTop(_hueMarker, -2);
+
                 if (updateHex)
                 {
                     _hex.Text = ColorEditing.ToHex(color);
@@ -174,6 +242,42 @@ namespace NeeView
             {
                 _isUpdating = false;
             }
+        }
+
+        private static Color FromHsv(double hue, double saturation, double value)
+        {
+            hue = ((hue % 360.0) + 360.0) % 360.0;
+            var c = value * saturation;
+            var x = c * (1 - Math.Abs((hue / 60.0) % 2 - 1));
+            var m = value - c;
+
+            double r, g, b;
+            if (hue < 60) { r = c; g = x; b = 0; }
+            else if (hue < 120) { r = x; g = c; b = 0; }
+            else if (hue < 180) { r = 0; g = c; b = x; }
+            else if (hue < 240) { r = 0; g = x; b = c; }
+            else if (hue < 300) { r = x; g = 0; b = c; }
+            else { r = c; g = 0; b = x; }
+
+            return Color.FromRgb((byte)Math.Round((r + m) * 255), (byte)Math.Round((g + m) * 255), (byte)Math.Round((b + m) * 255));
+        }
+
+        private static void ToHsv(Color color, out double hue, out double saturation, out double value)
+        {
+            double r = color.R / 255.0, g = color.G / 255.0, b = color.B / 255.0;
+            var max = Math.Max(r, Math.Max(g, b));
+            var min = Math.Min(r, Math.Min(g, b));
+            var delta = max - min;
+
+            value = max;
+            saturation = max <= 0 ? 0 : delta / max;
+
+            if (delta <= 0) hue = 0;
+            else if (max == r) hue = 60 * (((g - b) / delta) % 6);
+            else if (max == g) hue = 60 * (((b - r) / delta) + 2);
+            else hue = 60 * (((r - g) / delta) + 4);
+
+            if (hue < 0) hue += 360;
         }
     }
 
