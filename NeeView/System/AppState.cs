@@ -213,6 +213,20 @@ namespace NeeView
                 if (options.Values.Count > 0)
                 {
                     BookHubTools.RequestLoad(this, options.Values, BookLoadOption.FocusOnLoaded, true, null);
+
+                    // 새 책이 뜰 때까지 기다린 뒤 응답한다 (호출한 쪽이 그 뒤에 창을 앞으로 가져오므로, 이전 책이 잠깐 보이는 것을 막는다)
+                    // 최소화된 창은 크기가 없어 책이 뜨지 않으므로 기다리지 않는다
+                    if (MainWindow.Current.WindowState == System.Windows.WindowState.Minimized) return;
+                    try
+                    {
+                        await Task.Delay(50, token);
+                        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(token);
+                        timeout.CancelAfter(TimeSpan.FromSeconds(3));
+                        await BookHub.Current.WaitAsync(timeout.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                    }
                 }
                 return;
             }

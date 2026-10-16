@@ -59,6 +59,7 @@ namespace NeeView
 
         public void Restart(string[] args)
         {
+            var done = new ManualResetEventSlim();
             App.Current.Dispatcher.BeginInvoke(async () =>
             {
                 try
@@ -68,7 +69,14 @@ namespace NeeView
                 catch
                 {
                 }
+                finally
+                {
+                    done.Set();
+                }
             });
+
+            // 책이 뜰 때까지 응답을 미룬다. 호출한 쪽이 그 뒤에 창을 앞으로 가져온다 (이전 책이 잠깐 보이는 것을 막기 위해)
+            done.Wait(TimeSpan.FromSeconds(6));
         }
 
         public bool IsHideWindow(int _)

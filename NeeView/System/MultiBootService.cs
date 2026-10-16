@@ -151,9 +151,10 @@ namespace NeeView
 
             try
             {
-                ProcessActivator.AppActivate(_serverProcess);
-
+                // 먼저 책을 열게 하고, 다 뜬 뒤에 창을 앞으로 (순서가 반대면 이전에 보던 책이 잠깐 보인다)
                 await AppRemoteCommandClient.Current.RestartAsync(new RemoteCommandDelivery(_serverProcess), args);
+
+                ProcessActivator.AppActivate(_serverProcess);
             }
             catch (Exception ex)
             {

@@ -17,6 +17,7 @@ dotnet publish NeeView\NeeView.csproj -c Release -r win-x64 --self-contained fal
 dotnet build WaterViewLauncher\WaterViewLauncher.csproj -c Release -o <출력>
 ```
 - 릴리스 zip = 실행기 `WaterView.exe` + `app\`(publish 결과에서 `Profile*`, `*.pdb` 제외, `LICENSE.md`/`THIRDPARTY_LICENSES.md` 포함).
+- **작업 순서: 로컬 먼저, 업로드는 나중.** 이 폴더 맨 위의 `WaterView.exe` + `app` 이 곧 릴리스 모습이다(git 에는 안 올라감, `.git/info/exclude`). `toolsmake-package.ps1` 로 소스를 빌드해 여기를 갱신하고 zip 을 만든 뒤, 그 zip 을 릴리스에 올린다. 실행 중이면 덮어쓸 수 없으니 먼저 닫을 것.
 - **릴리스 자산 이름은 반드시 `WaterView.zip`** (버전 없음). 자동 업데이트가 이 이름으로 찾는다.
 - 버전은 `NeeView/NeeView.csproj` 와 `WaterViewLauncher/WaterViewLauncher.csproj` 의 `<Version>` 둘 다 올리고, 태그 `vX.Y.Z` 로 릴리스.
 - 릴리스 노트의 **앞 8줄이 업데이트 안내창에 그대로 보인다** → 앞부분을 짧은 요약으로 쓰고 마크다운 기호는 줄일 것.
