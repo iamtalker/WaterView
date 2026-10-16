@@ -242,8 +242,6 @@ namespace NeeView
                     new TreeListNode<MenuElement>(new CommandMenuElement() { CommandName = "HelpCommandList" }),
                     new TreeListNode<MenuElement>(new CommandMenuElement() { CommandName = "HelpScript" }),
                     new TreeListNode<MenuElement>(new CommandMenuElement() { CommandName = "HelpSearchOption" }),
-                    new TreeListNode<MenuElement>(new SeparatorMenuElement()),
-                    new TreeListNode<MenuElement>(new CommandMenuElement() { CommandName = "OpenVersionWindow" }),
                 }
             };
 
@@ -399,7 +397,6 @@ namespace NeeView
                 Cmd("CopyImage"),
                 Sep(),
                 Cmd("OpenOptionsWindow"),
-                Cmd("OpenVersionWindow"),
                 Cmd("CloseApplication"),
             };
 

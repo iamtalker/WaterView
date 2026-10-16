@@ -724,7 +724,6 @@ namespace NeeView
             AddShortCutKey(memento, "OpenExplorer", "Ctrl+Enter");
             AddShortCutKey(memento, "JumpPage", "Enter");
             AddShortCutKey(memento, "ToggleVisibleFileInfo", "Tab");
-            AddShortCutKey(memento, "OpenVersionWindow", "F1");
             AddShortCutKey(memento, "CloseApplication", "X");
             memento["ToggleSlideShow"].ShortCutKey = "F6";
             memento["ToggleFullScreen"].ShortCutKey = "F11";
