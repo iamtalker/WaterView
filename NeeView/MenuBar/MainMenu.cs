@@ -163,12 +163,15 @@ namespace NeeView
 
         /// <summary>
         /// Inserts a quick "theme" dropdown (UI theme + viewer background color) before the last item.
+        /// Custom themes and background colors can be added, edited and deleted from the "편집..." entries.
         /// </summary>
         private static void InsertThemeItem(List<object> items)
         {
             var group = new MenuItem { Header = "테마" };
+            var window = Application.Current.MainWindow;
 
-            var themes = new (string Label, ThemeType Type)[]
+            // built-in themes
+            var builtIn = new (string Label, ThemeType Type)[]
             {
                 ("어두운 테마", ThemeType.Dark),
                 ("밝은 테마", ThemeType.Light),
@@ -177,43 +180,49 @@ namespace NeeView
                 ("고대비", ThemeType.HighContrast),
                 ("시스템 설정 따르기", ThemeType.System),
             };
-            var themeItems = new List<(MenuItem Item, ThemeType Type)>();
-            foreach (var (label, type) in themes)
+            var themeItems = new List<(MenuItem Item, ThemeSource Source)>();
+            foreach (var (label, type) in builtIn)
             {
-                var themeType = type;
+                var source = new ThemeSource(type);
                 var item = new MenuItem { Header = label };
-                item.Click += (s, e) => Config.Current.Theme.ThemeType = new ThemeSource(themeType);
-                themeItems.Add((item, themeType));
+                item.Click += (s, e) => Config.Current.Theme.ThemeType = source;
+                themeItems.Add((item, source));
+                group.Items.Add(item);
+            }
+
+            // custom themes
+            var customThemes = CustomThemeList.Load();
+            if (customThemes.Count > 0)
+            {
+                group.Items.Add(new Separator());
+            }
+            foreach (var theme in customThemes)
+            {
+                var custom = theme;
+                var source = new ThemeSource(ThemeType.Custom, custom.Name + ".json");
+                var item = new MenuItem { Header = custom.Name };
+                item.Click += (s, e) => CustomThemeList.Apply(custom);
+                themeItems.Add((item, source));
                 group.Items.Add(item);
             }
 
             group.Items.Add(new Separator());
-
-            var background = new MenuItem { Header = "보기 배경 색" };
-            var colors = new (string Label, byte R, byte G, byte B)[]
+            var editTheme = new MenuItem { Header = "테마 편집..." };
+            editTheme.Click += (s, e) =>
             {
-                ("어두운 회색", 0x20, 0x20, 0x20),
-                ("검정", 0x00, 0x00, 0x00),
-                ("회색", 0x80, 0x80, 0x80),
-                ("밝은 회색", 0xD3, 0xD3, 0xD3),
-                ("흰색", 0xFF, 0xFF, 0xFF),
-                ("베이지", 0xF2, 0xE8, 0xD0),
-                ("남색", 0x1B, 0x25, 0x3F),
-                ("녹색", 0x1F, 0x3B, 0x2E),
+                CustomThemeList.ShowEditor(Application.Current.MainWindow);
+                Current.Update();
             };
+            group.Items.Add(editTheme);
+
+            // viewer background colors
+            var background = new MenuItem { Header = "보기 배경 색" };
             var colorItems = new List<(MenuItem Item, System.Windows.Media.Color Color)>();
-            foreach (var (label, r, g, b) in colors)
+            foreach (var preset in BackgroundPresetList.Load())
             {
-                var color = System.Windows.Media.Color.FromRgb(r, g, b);
-                var item = new MenuItem { Header = label };
-                item.Click += (s, e) =>
-                {
-                    // NOTE: the canvas watches this very BrushSource instance, so it must be edited in place (not replaced).
-                    var custom = Config.Current.Background.CustomBackground;
-                    custom.Type = BrushType.SolidColor;
-                    custom.Color = color;
-                    Config.Current.Background.BackgroundType = BackgroundType.Custom;
-                };
+                var color = preset.Color;
+                var item = new MenuItem { Header = preset.Name };
+                item.Click += (s, e) => BackgroundPresetList.Apply(color);
                 colorItems.Add((item, color));
                 background.Items.Add(item);
             }
@@ -224,19 +233,22 @@ namespace NeeView
             var auto = new MenuItem { Header = "이미지에 맞춤(자동)" };
             auto.Click += (s, e) => Config.Current.Background.BackgroundType = BackgroundType.Auto;
             background.Items.Add(auto);
+            background.Items.Add(new Separator());
+            var editBackground = new MenuItem { Header = "배경 색 편집..." };
+            editBackground.Click += (s, e) =>
+            {
+                BackgroundPresetList.ShowEditor(Application.Current.MainWindow);
+                Current.Update();
+            };
+            background.Items.Add(editBackground);
             group.Items.Add(background);
-
-            group.Items.Add(new Separator());
-            var more = new MenuItem { Header = "더 많은 색 설정..." };
-            more.Click += (s, e) => ThemeManager.OpenCustomThemeFolder();
-            group.Items.Add(more);
 
             group.SubmenuOpened += (s, e) =>
             {
-                var current = Config.Current.Theme.ThemeType.Type;
-                foreach (var (item, type) in themeItems)
+                var current = Config.Current.Theme.ThemeType;
+                foreach (var (item, source) in themeItems)
                 {
-                    item.IsChecked = current == type;
+                    item.IsChecked = current.Equals(source);
                 }
             };
             background.SubmenuOpened += (s, e) =>

@@ -82,9 +82,10 @@ namespace NeeView
                 Margin = new Thickness(10, 10, 10, 0),
             };
 
-            var reset = new Button { Content = "기본값", Width = 70, Margin = new Thickness(0, 0, 8, 0) };
-            var ok = new Button { Content = "확인", Width = 70, IsDefault = true, Margin = new Thickness(0, 0, 8, 0) };
-            var cancel = new Button { Content = "취소", Width = 70, IsCancel = true };
+            var buttonPadding = new Thickness(14, 3, 14, 3);
+            var reset = new Button { Content = "기본값", MinWidth = 80, Padding = buttonPadding, Margin = new Thickness(0, 0, 8, 0) };
+            var ok = new Button { Content = "확인", MinWidth = 70, Padding = buttonPadding, IsDefault = true, Margin = new Thickness(0, 0, 8, 0) };
+            var cancel = new Button { Content = "취소", MinWidth = 70, Padding = buttonPadding, IsCancel = true };
 
             var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(10, 0, 10, 10) };
             buttons.Children.Add(reset);
@@ -101,7 +102,7 @@ namespace NeeView
             var window = new Window
             {
                 Title = "슬라이드쇼 간격 편집",
-                Width = 340,
+                Width = 380,
                 Height = 360,
                 Owner = owner,
                 WindowStartupLocation = owner is null ? WindowStartupLocation.CenterScreen : WindowStartupLocation.CenterOwner,

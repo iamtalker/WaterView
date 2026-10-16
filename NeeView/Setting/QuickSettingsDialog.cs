@@ -27,7 +27,10 @@ namespace NeeView
         private readonly CheckBox _explorer = new() { Content = "탐색기 우클릭 메뉴에 \"물뷰로 열기\" 등록" };
         private readonly TextBox _accessKey = new() { Width = 40, MaxLength = 1, HorizontalAlignment = HorizontalAlignment.Left };
 
-        private static readonly (string Label, ThemeType Type)[] _themes =
+        private readonly List<(string Label, ThemeSource Source)> _themeChoices = new();
+        private List<BackgroundPreset> _colorChoices = new();
+
+        private static readonly (string Label, ThemeType Type)[] _builtInThemes =
         {
             ("어두운 테마", ThemeType.Dark),
             ("밝은 테마", ThemeType.Light),
@@ -37,22 +40,10 @@ namespace NeeView
             ("시스템 설정 따르기", ThemeType.System),
         };
 
-        private static readonly (string Label, Color Color)[] _colors =
-        {
-            ("어두운 회색", Color.FromRgb(0x20, 0x20, 0x20)),
-            ("검정", Color.FromRgb(0x00, 0x00, 0x00)),
-            ("회색", Color.FromRgb(0x80, 0x80, 0x80)),
-            ("밝은 회색", Color.FromRgb(0xD3, 0xD3, 0xD3)),
-            ("흰색", Color.FromRgb(0xFF, 0xFF, 0xFF)),
-            ("베이지", Color.FromRgb(0xF2, 0xE8, 0xD0)),
-            ("남색", Color.FromRgb(0x1B, 0x25, 0x3F)),
-            ("녹색", Color.FromRgb(0x1F, 0x3B, 0x2E)),
-        };
-
         private QuickSettingsDialog()
         {
             Title = "설정";
-            Width = 460;
+            Width = 480;
             SizeToContent = SizeToContent.Height;
             ResizeMode = ResizeMode.NoResize;
             ShowInTaskbar = false;
@@ -90,17 +81,22 @@ namespace NeeView
                 row++;
             }
 
-            AddRow("테마", _theme);
-            AddRow("보기 배경 색", _background);
+            var editPadding = new Thickness(10, 2, 10, 2);
+            UIElement WithEditButton(UIElement combo, out Button button)
+            {
+                var panel = new DockPanel();
+                button = new Button { Content = "편집...", Padding = editPadding, Margin = new Thickness(6, 0, 0, 0) };
+                DockPanel.SetDock(button, Dock.Right);
+                panel.Children.Add(button);
+                panel.Children.Add(combo);
+                return panel;
+            }
+
+            AddRow("테마", WithEditButton(_theme, out var editTheme));
+            AddRow("보기 배경 색", WithEditButton(_background, out var editBackground));
             AddRow("읽는 방향", _readOrder);
             AddRow("페이지 보기", _pageMode);
-
-            var intervalPanel = new DockPanel();
-            var editButton = new Button { Content = "편집...", Padding = new Thickness(10, 2, 10, 2), Margin = new Thickness(6, 0, 0, 0) };
-            DockPanel.SetDock(editButton, Dock.Right);
-            intervalPanel.Children.Add(editButton);
-            intervalPanel.Children.Add(_interval);
-            AddRow("슬라이드쇼 간격", intervalPanel);
+            AddRow("슬라이드쇼 간격", WithEditButton(_interval, out var editInterval));
 
             AddWide(_menuBar);
             AddWide(_explorer);
@@ -132,11 +128,6 @@ namespace NeeView
             root.Children.Add(grid);
             Content = root;
 
-            // items
-            foreach (var t in _themes) _theme.Items.Add(t.Label);
-            foreach (var c in _colors) _background.Items.Add(c.Label);
-            _background.Items.Add("체크무늬");
-            _background.Items.Add("이미지에 맞춤(자동)");
             _readOrder.Items.Add("왼쪽 → 오른쪽");
             _readOrder.Items.Add("오른쪽 → 왼쪽 (일본 만화)");
             _pageMode.Items.Add("한 쪽씩");
@@ -145,22 +136,26 @@ namespace NeeView
             // handlers
             _theme.SelectionChanged += (s, e) =>
             {
-                if (_isUpdating || _theme.SelectedIndex < 0) return;
-                Config.Current.Theme.ThemeType = new ThemeSource(_themes[_theme.SelectedIndex].Type);
+                if (_isUpdating || _theme.SelectedIndex < 0 || _theme.SelectedIndex >= _themeChoices.Count) return;
+                var source = _themeChoices[_theme.SelectedIndex].Source;
+                Config.Current.Theme.ThemeType = source;
+                ThemeManager.Current.RefreshThemeColor();
+            };
+            editTheme.Click += (s, e) =>
+            {
+                CustomThemeList.ShowEditor(this);
+                MainMenu.Current.Update();
+                Refresh();
             };
             _background.SelectionChanged += (s, e) =>
             {
                 if (_isUpdating || _background.SelectedIndex < 0) return;
                 var index = _background.SelectedIndex;
-                if (index < _colors.Length)
+                if (index < _colorChoices.Count)
                 {
-                    // NOTE: the canvas watches this very BrushSource instance, so it must be edited in place (not replaced).
-                    var custom = Config.Current.Background.CustomBackground;
-                    custom.Type = BrushType.SolidColor;
-                    custom.Color = _colors[index].Color;
-                    Config.Current.Background.BackgroundType = BackgroundType.Custom;
+                    BackgroundPresetList.Apply(_colorChoices[index].Color);
                 }
-                else if (index == _colors.Length)
+                else if (index == _colorChoices.Count)
                 {
                     Config.Current.Background.BackgroundType = BackgroundType.Check;
                 }
@@ -168,6 +163,12 @@ namespace NeeView
                 {
                     Config.Current.Background.BackgroundType = BackgroundType.Auto;
                 }
+            };
+            editBackground.Click += (s, e) =>
+            {
+                BackgroundPresetList.ShowEditor(this);
+                MainMenu.Current.Update();
+                Refresh();
             };
             _readOrder.SelectionChanged += (s, e) =>
             {
@@ -191,7 +192,7 @@ namespace NeeView
                     Config.Current.SlideShow.SlideShowInterval = seconds;
                 }
             };
-            editButton.Click += (s, e) =>
+            editInterval.Click += (s, e) =>
             {
                 if (SlideShowIntervalList.ShowEditor(this))
                 {
@@ -248,25 +249,44 @@ namespace NeeView
             _isUpdating = true;
             try
             {
-                _theme.SelectedIndex = Array.FindIndex(_themes, e => e.Type == Config.Current.Theme.ThemeType.Type);
+                // themes: built-in + custom
+                _themeChoices.Clear();
+                foreach (var (label, type) in _builtInThemes)
+                {
+                    _themeChoices.Add((label, new ThemeSource(type)));
+                }
+                foreach (var custom in CustomThemeList.Load())
+                {
+                    _themeChoices.Add((custom.Name, new ThemeSource(ThemeType.Custom, custom.Name + ".json")));
+                }
+                _theme.Items.Clear();
+                foreach (var choice in _themeChoices) _theme.Items.Add(choice.Label);
+                _theme.SelectedIndex = _themeChoices.FindIndex(e => e.Source.Equals(Config.Current.Theme.ThemeType));
+
+                // background colors: presets + checker + auto
+                _colorChoices = BackgroundPresetList.Load();
+                _background.Items.Clear();
+                foreach (var preset in _colorChoices) _background.Items.Add(preset.Name);
+                _background.Items.Add("체크무늬");
+                _background.Items.Add("이미지에 맞춤(자동)");
 
                 var backgroundType = Config.Current.Background.BackgroundType;
                 if (backgroundType == BackgroundType.Custom)
                 {
                     var color = Config.Current.Background.CustomBackground.Color;
-                    _background.SelectedIndex = Array.FindIndex(_colors, e => e.Color == color);
+                    _background.SelectedIndex = _colorChoices.FindIndex(e => e.Color == color);
                 }
                 else if (backgroundType == BackgroundType.Check)
                 {
-                    _background.SelectedIndex = _colors.Length;
+                    _background.SelectedIndex = _colorChoices.Count;
                 }
                 else if (backgroundType == BackgroundType.Auto)
                 {
-                    _background.SelectedIndex = _colors.Length + 1;
+                    _background.SelectedIndex = _colorChoices.Count + 1;
                 }
                 else
                 {
-                    _background.SelectedIndex = backgroundType == BackgroundType.White ? 4 : 1;
+                    _background.SelectedIndex = -1;
                 }
 
                 _readOrder.SelectedIndex = BookSettings.Current.BookReadOrder == PageReadOrder.LeftToRight ? 0 : 1;
