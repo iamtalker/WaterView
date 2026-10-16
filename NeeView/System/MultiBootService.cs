@@ -56,16 +56,19 @@ namespace NeeView
                     }
 #endif
                     // 自身以外のプロセスをターゲットにする
+                    // NOTE: 別セッション/管理者権限などで情報を読めないプロセスがあっても全体を失敗させず、そのプロセスだけ除外する。
+                    //       (以前は例外で 0.5 秒待機を 2 回行い、起動が約 1 秒遅れていた)
+                    var currentFileName = TryGetFileName(currentProcess);
                     var appProcess = processes
                         // 自身以外のプロセス
                         .Where(p => p.Id != currentProcess.Id)
                         // 設定により、実行ファイルパスが一致したものに限定
-                        .Where(p => !AppSettings.Current.PathProcessGroup || p.MainModule?.FileName == currentProcess.MainModule?.FileName)
+                        .Where(p => !AppSettings.Current.PathProcessGroup || (currentFileName is not null && TryGetFileName(p) == currentFileName))
                         .ToList();
 
                     var serverProcess = appProcess
                         // ウィンドウハンドルが存在するもの
-                        .Where(p => p.MainWindowHandle != IntPtr.Zero)
+                        .Where(p => TryHasWindow(p))
                         // 最新のもの
                         .LastOrDefault();
 
@@ -74,11 +77,18 @@ namespace NeeView
                         // タスクトレイプロセス選択
                         foreach (var p in appProcess)
                         {
-                            var isHideWindowProcess = await AppRemoteCommandClient.Current.IsHideWindowAsync(new RemoteCommandDelivery(p));
-                            if (isHideWindowProcess)
+                            try
                             {
-                                serverProcess = p;
-                                break;
+                                var isHideWindowProcess = await AppRemoteCommandClient.Current.IsHideWindowAsync(new RemoteCommandDelivery(p));
+                                if (isHideWindowProcess)
+                                {
+                                    serverProcess = p;
+                                    break;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Trace.WriteLine($"GetServerProcess: skip process {p.Id}: {ex.Message}");
                             }
                         }
                     }
@@ -105,6 +115,32 @@ namespace NeeView
             return null;
         }
 
+
+        private static string? TryGetFileName(Process process)
+        {
+            try
+            {
+                return process.MainModule?.FileName;
+            }
+            catch (Exception ex)
+            {
+                // access denied (other session / elevated / exiting process)
+                Trace.WriteLine($"GetServerProcess: cannot read process {process.Id}: {ex.Message}");
+                return null;
+            }
+        }
+
+        private static bool TryHasWindow(Process process)
+        {
+            try
+            {
+                return process.MainWindowHandle != IntPtr.Zero;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         /// <summary>
         /// サーバーに起動引数を送る
