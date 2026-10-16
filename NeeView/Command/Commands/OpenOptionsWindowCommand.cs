@@ -12,7 +12,8 @@ namespace NeeView
 
         public override void Execute(object? sender, CommandContext e)
         {
-            MainWindowModel.Current.OpenSettingWindow();
+            // The simple settings window; the full NeeView settings are opened from its "상세 설정..." button.
+            QuickSettingsDialog.ShowOrActivate();
         }
     }
 }

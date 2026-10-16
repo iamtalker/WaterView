@@ -111,7 +111,6 @@ namespace NeeView.Setting
         public SettingPageStartUp() : base(TextResources.GetString("SettingPage.General.Boot"))
         {
             var section = new SettingItemSection(TextResources.GetString("SettingPage.General.Boot"), TextResources.GetString("SettingPage.General.Boot.Remarks"));
-            section.Children.Add(new SettingItemProperty(PropertyMemberElement.Create(Config.Current.StartUp, nameof(StartUpConfig.IsSplashScreenEnabled))));
             section.Children.Add(new SettingItemProperty(PropertyMemberElement.Create(Config.Current.StartUp, nameof(StartUpConfig.IsMultiBootEnabled))));
             section.Children.Add(new SettingItemProperty(PropertyMemberElement.Create(Config.Current.StartUp, nameof(StartUpConfig.IsRestoreWindowPlacement))));
             section.Children.Add(new SettingItemProperty(PropertyMemberElement.Create(Config.Current.Window, nameof(WindowConfig.IsRestoreAeroSnapPlacement)))

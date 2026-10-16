@@ -25,7 +25,6 @@ namespace NeeView
         public static new App Current => _current ?? throw new InvalidOperationException("_current must not be null");
 
 
-        private bool _isSplashScreenVisible;
         private bool _isTerminated;
         private readonly int _tickBase = System.Environment.TickCount;
         private CommandLineOption? _option;
@@ -247,10 +246,6 @@ namespace NeeView
             Trace.WriteLine("Run remote command server");
             AppRemoteCommandServer.Current.Start();
 
-            // show splash screen
-            Trace.WriteLine("Show splash screen");
-            ShowSplashScreen(boot);
-
             // initialize before UserSetting
             Trace.WriteLine("Initialize Text Resource");
             var language = _option.Language ?? boot.Language;
@@ -427,29 +422,6 @@ namespace NeeView
         {
             using var span = DebugSpan();
             _ = ThemeManager.Current;
-        }
-
-        /// <summary>
-        /// Show SplashScreen
-        /// </summary>
-        public void ShowSplashScreen(BootSetting bootSetting)
-        {
-            // The startup logo is disabled in WaterView.
-            if (false && bootSetting.IsSplashScreenEnabled && CanStart(bootSetting.IsMultiBootEnabled) && !this.Option.IsVersion && Option.IsTray != SwitchOption.on)
-            {
-                if (_isSplashScreenVisible) return;
-                _isSplashScreenVisible = true;
-
-                using var span = DebugSpan();
-                var resourceName = "Resources/SplashScreen.png";
-                var splashScreen = new SplashScreen(resourceName);
-#if DEBUG
-                var topmost = false;
-#else
-                var topmost = true;
-#endif
-                splashScreen.Show(true, topmost);
-            }
         }
 
         /// <summary>

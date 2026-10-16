@@ -10,6 +10,12 @@
 - 상단 아이콘 도구 줄 (EXIF, 보기 모드, 슬라이드쇼, 책갈피, 편집, 항상 위에 표시, 메뉴)
 - 앱 이름 "물뷰", 새 아이콘
 
+## 폴더 구성
+배포 zip 을 풀면 겉에는 `WaterView.exe` 하나만 보이고, 프로그램 본체와 라이브러리는 `app` 폴더 안에 있습니다. `WaterView.exe` 는 `WaterViewLauncher` 프로젝트로 만든 작은 실행기이며 `appWaterView.exe` 를 시작합니다.
+
+## 설정
+`F5` 는 자주 쓰는 항목(테마, 배경색, 읽는 방향, 슬라이드쇼 간격, 우클릭 메뉴 등록)만 모은 간단한 설정 창이고, 나머지 모든 설정은 `상세 설정...` 에서 바꿉니다.
+
 ## 실행 환경
 Windows 10/11 x64, [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)
 

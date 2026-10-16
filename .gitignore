@@ -248,3 +248,7 @@ launchSettings.json
 # local backups
 *.orig
 Profile.stale-archive/
+
+# launcher build output
+WaterViewLauncher/bin/
+WaterViewLauncher/obj/

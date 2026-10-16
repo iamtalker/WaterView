@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>WaterView</AssemblyName>
+    <RootNamespace>WaterViewLauncher</RootNamespace>
+    <Version>0.2.0</Version>
+    <AssemblyTitle>물뷰</AssemblyTitle>
+    <Product>물뷰</Product>
+    <Description>물뷰 실행기</Description>
+    <ApplicationIcon>..\NeeView\Resources\App.ico</ApplicationIcon>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+</Project>

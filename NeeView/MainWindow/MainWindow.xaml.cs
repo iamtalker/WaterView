@@ -547,7 +547,25 @@ namespace NeeView
             Trace.WriteLine("App.MainWindow.ContentRendered Done");
 
             // 初回起動ダイアログ
-            // The welcome dialog is skipped: Honeyview-like defaults are applied as is.
+            // First run: the standard welcome dialog is skipped. Only ask about the Explorer context menu.
+            if (!Config.Current.System.IsLoadedSettings && Environment.IsZipLikePackage && !ExplorerContextMenu.Current.IsEnabled)
+            {
+                var key = ExplorerContextMenu.Current.AccessKey;
+                var answer = MessageBox.Show(
+                    this,
+                    $"탐색기 우클릭 메뉴에 '물뷰로 열기({key})'를 등록할까요?\n\n" +
+                    "zip, 만화 압축 파일, 이미지, 폴더를 우클릭했을 때 물뷰로 바로 열 수 있습니다.\n" +
+                    $"등록하면 단축키 {key} 번으로 선택할 수 있고, 설정 > 탐색기에서 단축키를 바꾸거나 해제할 수 있습니다.\n" +
+                    "(현재 사용자 레지스트리에만 등록됩니다.)",
+                    "물뷰",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+
+                if (answer == MessageBoxResult.Yes)
+                {
+                    ExplorerContextMenu.Current.IsEnabled = true;
+                }
+            }
         }
 
         // ウィンドウアクティブ

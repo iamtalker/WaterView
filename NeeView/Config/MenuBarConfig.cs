@@ -9,7 +9,7 @@ namespace NeeView
     public partial class MenuBarConfig : ObservableObject
     {
         [IgnoreEquality] private bool _isVisible;
-        [DefaultEquality] private bool _isHideMenu = true;
+        [DefaultEquality] private bool _isHideMenu = false;
         [DefaultEquality] private bool _isAddressBarEnabled = false;
         [DefaultEquality] private bool _isHamburgerMenu;
         [DefaultEquality] private bool _isHideMenuInAutoHideMode = true;
