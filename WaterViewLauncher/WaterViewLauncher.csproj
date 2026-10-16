@@ -1,18 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <!--
+    The launcher targets .NET Framework 4.8 (built into Windows 10/11) on purpose:
+    it must start on a PC that does not have the .NET 10 runtime yet, so that it can offer to install it.
+  -->
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <PlatformTarget>x64</PlatformTarget>
     <AssemblyName>WaterView</AssemblyName>
     <RootNamespace>WaterViewLauncher</RootNamespace>
-    <Version>0.2.2</Version>
+    <Version>0.3.0</Version>
     <AssemblyTitle>물뷰</AssemblyTitle>
     <Product>물뷰</Product>
     <Description>물뷰 실행기</Description>
     <ApplicationIcon>..\NeeView\Resources\App.ico</ApplicationIcon>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <DebugType>none</DebugType>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
 
 </Project>

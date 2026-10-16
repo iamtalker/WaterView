@@ -17,7 +17,7 @@
 `F5` 는 자주 쓰는 항목(테마, 배경색, 읽는 방향, 슬라이드쇼 간격, 우클릭 메뉴 등록)만 모은 간단한 설정 창이고, 나머지 모든 설정은 `상세 설정...` 에서 바꿉니다.
 
 ## 실행 환경
-Windows 10/11 x64, [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)
+Windows 10/11 x64. `.NET 10 데스크톱 런타임`이 필요하며, 없으면 `WaterView.exe` 가 처음 실행할 때 내려받아 설치할지 물어봅니다. ([직접 설치](https://dotnet.microsoft.com/download/dotnet/10.0))
 
 ## 빌드
 ```
