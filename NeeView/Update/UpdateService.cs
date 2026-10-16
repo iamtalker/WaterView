@@ -135,11 +135,20 @@ namespace NeeView
         private static string SummarizeNotes(string body)
         {
             var lines = body.Replace("\r", "").Split('\n')
-                .Select(l => l.Trim().TrimStart('#', '-', '*', ' '))
+                .Select(CleanNoteLine)
                 .Where(l => l.Length > 0)
-                .Take(8);
-            var text = string.Join("\n", lines);
-            return text.Length > 600 ? text[..600] + "..." : text;
+                .Take(6);
+            return string.Join("\n", lines);
+        }
+
+        // Drops markdown marks (headings, bullets, bold, code, links) and shortens a line to fit the prompt.
+        private static string CleanNoteLine(string line)
+        {
+            var s = line.Trim().TrimStart('#', '-', '*', '>', ' ');
+            s = System.Text.RegularExpressions.Regex.Replace(s, @"\[([^\]]*)\]\([^)]*\)", "$1");
+            s = s.Replace("**", "").Replace("__", "").Replace("`", "").Trim();
+            if (s.Length == 0) return "";
+            return s.Length > 70 ? s[..70] + "…" : s;
         }
 
         // ---- startup / manual entry points ----
