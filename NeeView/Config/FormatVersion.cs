@@ -57,7 +57,8 @@ namespace NeeView
 
         public static string CreateFormatName(params string[] names)
         {
-            return Environment.ApplicationName + "." + string.Join(".", names);
+            // keep the original name so that exported data stays compatible with NeeView
+            return Environment.SolutionName + "." + string.Join(".", names);
         }
 
         public static FormatVersion Parse(string s)

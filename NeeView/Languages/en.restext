@@ -2713,3 +2713,5 @@ ZipArchiveConfig.SupportFileTypes.Remarks=Only ZIP format is supported.
 ZipEncoding.Auto=Auto
 ZipEncoding.Local=Local
 ZipEncoding.UTF8=UTF-8
+ExplorerContextMenu.AccessKey=Explorer context menu access key
+ExplorerContextMenu.AccessKey.Remarks=The accelerator key character (one letter or digit) of the Explorer context menu entry.

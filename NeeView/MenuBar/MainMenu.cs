@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NeeLaboratory.ComponentModel;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -69,6 +71,8 @@ namespace NeeView
             items.Add(_debugMenu.CreateDevMenuItem());
 #endif
 
+            ReplaceSlideShowItem(items);
+
             // Honeyview-like toolbar: icon + label for the top level items
             foreach (var topItem in items.OfType<MenuItem>())
             {
@@ -101,6 +105,48 @@ namespace NeeView
             }
 
             return menu;
+        }
+
+        /// <summary>
+        /// Replaces the slideshow command item with a dropdown: start/stop + interval choices (seconds).
+        /// </summary>
+        private static void ReplaceSlideShowItem(List<object> items)
+        {
+            var index = items.FindIndex(e => e is MenuItem m && m.Header is string s && s.Contains("슬라이드"));
+            if (index < 0) return;
+
+            var original = (MenuItem)items[index];
+            var group = new MenuItem { Header = "슬라이드쇼" };
+
+            var toggle = new MenuItem { Header = "시작 / 정지", InputGestureText = original.InputGestureText };
+            toggle.Click += (s, e) => SlideShow.Current.SetPlaying(!SlideShow.Current.IsPlaying);
+            group.Items.Add(toggle);
+            group.Items.Add(new Separator());
+
+            var intervals = new[] { 1.0, 2.0, 3.0, 5.0, 7.0, 10.0, 15.0, 20.0, 30.0 };
+            var intervalItems = new List<(MenuItem Item, double Value)>();
+            foreach (var seconds in intervals)
+            {
+                var value = seconds;
+                var interval = new MenuItem { Header = $"{value:0}초", IsCheckable = false };
+                interval.Click += (s, e) =>
+                {
+                    Config.Current.SlideShow.SlideShowInterval = value;
+                    SlideShow.Current.SetPlaying(true);
+                };
+                intervalItems.Add((interval, value));
+                group.Items.Add(interval);
+            }
+
+            group.SubmenuOpened += (s, e) =>
+            {
+                foreach (var (item, value) in intervalItems)
+                {
+                    item.IsChecked = Math.Abs(Config.Current.SlideShow.SlideShowInterval - value) < 0.05;
+                }
+            };
+
+            items[index] = group;
         }
 
         private static void AddToolbarIcon(MenuItem item)
