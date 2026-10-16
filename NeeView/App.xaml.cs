@@ -434,7 +434,8 @@ namespace NeeView
         /// </summary>
         public void ShowSplashScreen(BootSetting bootSetting)
         {
-            if (bootSetting.IsSplashScreenEnabled && CanStart(bootSetting.IsMultiBootEnabled) && !this.Option.IsVersion && Option.IsTray != SwitchOption.on)
+            // The startup logo is disabled in WaterView.
+            if (false && bootSetting.IsSplashScreenEnabled && CanStart(bootSetting.IsMultiBootEnabled) && !this.Option.IsVersion && Option.IsTray != SwitchOption.on)
             {
                 if (_isSplashScreenVisible) return;
                 _isSplashScreenVisible = true;

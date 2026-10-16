@@ -305,6 +305,7 @@ namespace NeeView
                     Sep(),
                     Cmd("DeleteFile"),
                 },
+                Cmd("ToggleFullScreen"),
                 Cmd("ToggleTopmost"),
             };
 

@@ -123,12 +123,12 @@ namespace NeeView
             group.Items.Add(toggle);
             group.Items.Add(new Separator());
 
-            var intervals = new[] { 1.0, 2.0, 3.0, 5.0, 7.0, 10.0, 15.0, 20.0, 30.0 };
+            var intervals = SlideShowIntervalList.Load();
             var intervalItems = new List<(MenuItem Item, double Value)>();
             foreach (var seconds in intervals)
             {
                 var value = seconds;
-                var interval = new MenuItem { Header = $"{value:0}초", IsCheckable = false };
+                var interval = new MenuItem { Header = $"{value:0.#}초", IsCheckable = false };
                 interval.Click += (s, e) =>
                 {
                     Config.Current.SlideShow.SlideShowInterval = value;
@@ -137,6 +137,17 @@ namespace NeeView
                 intervalItems.Add((interval, value));
                 group.Items.Add(interval);
             }
+
+            group.Items.Add(new Separator());
+            var edit = new MenuItem { Header = "편집..." };
+            edit.Click += (s, e) =>
+            {
+                if (SlideShowIntervalList.ShowEditor(Application.Current.MainWindow))
+                {
+                    Current.Update();
+                }
+            };
+            group.Items.Add(edit);
 
             group.SubmenuOpened += (s, e) =>
             {
@@ -161,6 +172,7 @@ namespace NeeView
                 _ when text.Contains("책갈피") => "g_bookmark_24px",
                 _ when text.Contains("편집") => "g_content_copy_24px",
                 _ when text.Contains("위에") => "g_push_pin_24px",
+                _ when text.Contains("전체 화면") || text.Contains("전체화면") => "g_desktop_windows_24px",
                 _ when text == "메뉴" => "g_menu_24px",
                 _ => null,
             };
