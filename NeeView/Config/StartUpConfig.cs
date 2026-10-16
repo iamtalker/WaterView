@@ -19,7 +19,7 @@ namespace NeeView
         [DefaultEquality] private bool _isRestoreWindowPlacement = true;
         [DefaultEquality] private bool _isRestoreSecondWindowPlacement = true;
         [DefaultEquality] private bool _isRestoreFullScreen;
-        [DefaultEquality] private bool _isOpenLastBook;
+        [DefaultEquality] private bool _isOpenLastBook = true;
         [DefaultEquality] private bool _isOpenLastFolder;
         [DefaultEquality] private bool _isOpenLastBookmarkFolder;
         [DefaultEquality] private bool _isAutoPlaySlideShow;

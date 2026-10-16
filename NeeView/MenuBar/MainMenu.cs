@@ -72,6 +72,7 @@ namespace NeeView
 #endif
 
             ReplaceSlideShowItem(items);
+            AddUpdateItem(items);
             InsertThemeItem(items);
 
             // Honeyview-like toolbar: icon + label for the top level items
@@ -159,6 +160,19 @@ namespace NeeView
             };
 
             items[index] = group;
+        }
+
+        /// <summary>
+        /// Adds "업데이트 확인..." at the end of the last ("메뉴") group.
+        /// </summary>
+        private static void AddUpdateItem(List<object> items)
+        {
+            if (items.LastOrDefault() is not MenuItem last || last.Header is not string header || header != "메뉴") return;
+
+            var item = new MenuItem { Header = "업데이트 확인..." };
+            item.Click += async (s, e) => await UpdateService.CheckNowAsync(Application.Current.MainWindow);
+            last.Items.Add(new Separator());
+            last.Items.Add(item);
         }
 
         /// <summary>

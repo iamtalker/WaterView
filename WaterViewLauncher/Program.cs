@@ -2,8 +2,10 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Win32;
 
@@ -11,7 +13,8 @@ namespace WaterViewLauncher
 {
     /// <summary>
     /// Tiny launcher. The real application lives in the "app" folder next to this exe.
-    /// If the .NET 10 Desktop Runtime is missing, it offers to download and install it first.
+    /// - If the .NET 10 Desktop Runtime is missing, it offers to download and install it first.
+    /// - "--update zip installDir pid": applies a downloaded update (used by the app's self-update).
     /// </summary>
     internal static class Program
     {
@@ -24,6 +27,11 @@ namespace WaterViewLauncher
         private static int Main(string[] args)
         {
             Application.EnableVisualStyles();
+
+            if (args.Length >= 4 && args[0] == "--update")
+            {
+                return RunUpdate(args[1], args[2], args[3]);
+            }
 
             var baseDir = AppDomain.CurrentDomain.BaseDirectory;
             var target = Path.Combine(baseDir, "app", "WaterView.exe");
@@ -41,6 +49,11 @@ namespace WaterViewLauncher
                 }
             }
 
+            return StartApp(target, args);
+        }
+
+        private static int StartApp(string target, string[] args)
+        {
             try
             {
                 var info = new ProcessStartInfo(target)
@@ -66,6 +79,254 @@ namespace WaterViewLauncher
             var escaped = arg.Replace("\\\"", "\\\\\"").Replace("\"", "\\\"");
             if (escaped.EndsWith("\\")) escaped += "\\";
             return "\"" + escaped + "\"";
+        }
+
+        // ---- self-update ----
+
+        /// <summary>
+        /// Waits for the app to exit, swaps the "app" folder (keeping its Profile folder) and the launcher,
+        /// then starts the new version. On failure the previous version is restored.
+        /// </summary>
+        private static int RunUpdate(string zipPath, string installDir, string pidText)
+        {
+            using (var form = new Form())
+            using (var label = new Label())
+            {
+                form.Text = Caption;
+                form.ClientSize = new System.Drawing.Size(340, 64);
+                form.FormBorderStyle = FormBorderStyle.FixedDialog;
+                form.ControlBox = false;
+                form.StartPosition = FormStartPosition.CenterScreen;
+                label.Text = "물뷰를 업데이트하는 중입니다...";
+                label.SetBounds(16, 22, 308, 22);
+                form.Controls.Add(label);
+                form.Show();
+                Application.DoEvents();
+
+                string? error = null;
+                try
+                {
+                    ApplyUpdate(zipPath, installDir, pidText, () => Application.DoEvents());
+                }
+                catch (Exception ex)
+                {
+                    error = ex.Message;
+                }
+
+                form.Close();
+
+                if (error != null)
+                {
+                    MessageBox.Show("업데이트에 실패해 이전 버전을 그대로 사용합니다.\n\n" + error + "\n\n(자세한 기록: " + LogPath + ")", Caption, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+
+            // start whatever is installed now (the new version, or the previous one after a failure)
+            var launcher = Path.Combine(installDir, "WaterView.exe");
+            try
+            {
+                if (File.Exists(launcher)) Process.Start(new ProcessStartInfo(launcher) { UseShellExecute = false, WorkingDirectory = installDir });
+            }
+            catch
+            {
+                // nothing more to do
+            }
+            return 0;
+        }
+
+        private static string LogPath => Path.Combine(Path.GetTempPath(), "WaterViewUpdate", "update.log");
+
+        private static void Log(string message)
+        {
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(LogPath));
+                File.AppendAllText(LogPath, DateTime.Now.ToString("HH:mm:ss.fff") + "  " + message + Environment.NewLine);
+            }
+            catch
+            {
+                // logging must never break the update
+            }
+        }
+
+        private static void ApplyUpdate(string zipPath, string installDir, string pidText, Action pump)
+        {
+            Log("update start: zip=" + zipPath + " install=" + installDir + " pid=" + pidText);
+            installDir = Path.GetFullPath(installDir).TrimEnd('\\');
+            var appDir = Path.Combine(installDir, "app");
+            var staging = Path.Combine(installDir, ".update-new");
+            var backup = Path.Combine(installDir, ".update-old");
+
+            // 1. wait for the running app to exit
+            if (int.TryParse(pidText, out var pid))
+            {
+                try
+                {
+                    using (var process = Process.GetProcessById(pid))
+                    {
+                        var waited = 0;
+                        while (!process.HasExited && waited < 60000)
+                        {
+                            Thread.Sleep(200);
+                            waited += 200;
+                            pump();
+                        }
+                        if (!process.HasExited) throw new IOException("물뷰가 종료되지 않아 업데이트를 중단했습니다.");
+                    }
+                }
+                catch (ArgumentException)
+                {
+                    // already gone
+                }
+            }
+
+            if (!File.Exists(zipPath)) throw new FileNotFoundException("내려받은 파일을 찾을 수 없습니다.", zipPath);
+
+            // 2. extract to a staging folder (never straight over the installed files)
+            DeleteDirectory(staging);
+            DeleteDirectory(backup);
+            Directory.CreateDirectory(staging);
+            var stagingFull = Path.GetFullPath(staging).TrimEnd('\\') + "\\";
+
+            using (var archive = ZipFile.OpenRead(zipPath))
+            {
+                foreach (var entry in archive.Entries)
+                {
+                    if (string.IsNullOrEmpty(entry.Name)) continue; // directory entry
+
+                    var destination = Path.GetFullPath(Path.Combine(staging, entry.FullName.Replace('/', '\\')));
+                    if (!destination.StartsWith(stagingFull, StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new IOException("올바르지 않은 파일 경로가 들어 있어 중단했습니다: " + entry.FullName);
+                    }
+                    Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+                    entry.ExtractToFile(destination, true);
+                    pump();
+                }
+            }
+
+            if (!File.Exists(Path.Combine(staging, "app", "WaterView.exe")) || !File.Exists(Path.Combine(staging, "WaterView.exe")))
+            {
+                DeleteDirectory(staging);
+                throw new IOException("내려받은 파일의 구성이 올바르지 않습니다.");
+            }
+
+            Log("extracted to staging");
+
+            // 3. keep the user's data (settings, history, thumbnails): move Profile into the new app folder
+            var oldProfile = Path.Combine(appDir, "Profile");
+            var newProfile = Path.Combine(staging, "app", "Profile");
+            DeleteDirectory(newProfile);
+
+            // 4. swap folders; roll back on any failure
+            var movedProfile = false;
+            var movedApp = false;
+            try
+            {
+                if (Directory.Exists(oldProfile))
+                {
+                    Log("moving Profile into the new app folder");
+                    MoveWithRetry(oldProfile, newProfile);
+                    movedProfile = true;
+                }
+                Log("renaming app -> .update-old");
+                MoveWithRetry(appDir, backup);
+                movedApp = true;
+                Log("moving new app into place");
+                MoveWithRetry(Path.Combine(staging, "app"), appDir);
+
+                Log("replacing the launcher");
+                CopyWithRetry(Path.Combine(staging, "WaterView.exe"), Path.Combine(installDir, "WaterView.exe"));
+                Log("swap done");
+            }
+            catch (Exception ex)
+            {
+                Log("FAILED: " + ex);
+                try
+                {
+                    if (movedApp)
+                    {
+                        if (Directory.Exists(appDir)) MoveWithRetry(appDir, Path.Combine(installDir, ".update-failed"));
+                        MoveWithRetry(backup, appDir);
+                    }
+                    if (movedProfile && Directory.Exists(newProfile) && !Directory.Exists(oldProfile))
+                    {
+                        MoveWithRetry(newProfile, oldProfile);
+                    }
+                }
+                catch
+                {
+                    // best effort
+                }
+                throw;
+            }
+
+            // 5. clean up
+            DeleteDirectory(backup);
+            DeleteDirectory(Path.Combine(installDir, ".update-failed"));
+            DeleteDirectory(staging);
+        }
+
+        /// <summary>
+        /// Right after the app exits, Windows (or a virus scanner) may still hold files for a moment,
+        /// which makes a folder rename fail with "access denied". Retry for a few seconds.
+        /// </summary>
+        private static void MoveWithRetry(string source, string destination)
+        {
+            for (var i = 0; ; i++)
+            {
+                try
+                {
+                    Directory.Move(source, destination);
+                    return;
+                }
+                catch (Exception ex) when ((ex is IOException || ex is UnauthorizedAccessException) && i < 20)
+                {
+                    Log("move retry " + (i + 1) + ": " + source + " -> " + destination + " : " + ex.Message);
+                    Thread.Sleep(500);
+                }
+            }
+        }
+
+        private static void CopyWithRetry(string source, string destination)
+        {
+            for (var i = 0; ; i++)
+            {
+                try
+                {
+                    File.Copy(source, destination, true);
+                    return;
+                }
+                catch (IOException) when (i < 10)
+                {
+                    Thread.Sleep(300);
+                }
+                catch (UnauthorizedAccessException) when (i < 10)
+                {
+                    Thread.Sleep(300);
+                }
+            }
+        }
+
+        private static void DeleteDirectory(string path)
+        {
+            if (!Directory.Exists(path)) return;
+            for (var i = 0; ; i++)
+            {
+                try
+                {
+                    Directory.Delete(path, true);
+                    return;
+                }
+                catch (Exception) when (i < 5)
+                {
+                    Thread.Sleep(300);
+                }
+                catch
+                {
+                    return; // leftovers are removed by the next update
+                }
+            }
         }
 
         // ---- runtime detection ----

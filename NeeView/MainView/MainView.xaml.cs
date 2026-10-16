@@ -103,6 +103,20 @@ namespace NeeView
             _vm.ViewComponent.FocusMainViewRequest += (s, e) => FocusMainView();
 
             _mainViewCursor.Initialize();
+
+            // welcome image while no book is open
+            BookHub.Current.BookChanged += (s, e) => UpdateWelcome();
+            BookHub.Current.IsLoadingChanged += (s, e) => UpdateWelcome();
+            UpdateWelcome();
+        }
+
+        private void UpdateWelcome()
+        {
+            Dispatcher.BeginInvoke(() =>
+            {
+                var hub = BookHub.Current;
+                this.WelcomeView.Visibility = hub.GetCurrentBook() is null && !hub.IsLoading ? Visibility.Visible : Visibility.Collapsed;
+            });
         }
 
         private void MainView_DataContextChanged(object? sender, DependencyPropertyChangedEventArgs e)

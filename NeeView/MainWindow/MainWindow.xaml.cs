@@ -566,6 +566,9 @@ namespace NeeView
                     ExplorerContextMenu.Current.IsEnabled = true;
                 }
             }
+
+            // look for a newer release (at most once a day, in the background)
+            _ = UpdateService.CheckOnStartupAsync(this);
         }
 
         // ウィンドウアクティブ

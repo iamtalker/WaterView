@@ -24,6 +24,8 @@ namespace NeeView
         private readonly ComboBox _pageMode = new();
         private readonly ComboBox _interval = new();
         private readonly CheckBox _menuBar = new() { Content = "상단 메뉴 막대를 항상 표시" };
+        private readonly CheckBox _resume = new() { Content = "시작할 때 마지막에 보던 책을 이어서 열기" };
+        private readonly CheckBox _autoUpdate = new() { Content = "시작할 때 새 버전 확인 (하루 한 번)" };
         private readonly CheckBox _explorer = new() { Content = "탐색기 우클릭 메뉴에 \"물뷰로 열기\" 등록" };
         private readonly TextBox _accessKey = new() { Width = 40, MaxLength = 1, HorizontalAlignment = HorizontalAlignment.Left };
 
@@ -99,6 +101,15 @@ namespace NeeView
             AddRow("슬라이드쇼 간격", WithEditButton(_interval, out var editInterval));
 
             AddWide(_menuBar);
+            AddWide(_resume);
+
+            var updatePanel = new DockPanel();
+            var checkNow = new Button { Content = "지금 확인", Padding = new Thickness(10, 2, 10, 2), Margin = new Thickness(6, 0, 0, 0) };
+            DockPanel.SetDock(checkNow, Dock.Right);
+            updatePanel.Children.Add(checkNow);
+            updatePanel.Children.Add(_autoUpdate);
+            AddWide(updatePanel);
+
             AddWide(_explorer);
 
             var keyPanel = new StackPanel { Orientation = Orientation.Horizontal };
@@ -205,6 +216,19 @@ namespace NeeView
                 if (_isUpdating) return;
                 Config.Current.MenuBar.IsHideMenu = _menuBar.IsChecked != true;
             };
+            _resume.Click += (s, e) =>
+            {
+                if (_isUpdating) return;
+                Config.Current.StartUp.IsOpenLastBook = _resume.IsChecked == true;
+            };
+            _autoUpdate.Click += (s, e) =>
+            {
+                if (_isUpdating) return;
+                var settings = UpdateService.LoadSettings();
+                settings.AutoCheck = _autoUpdate.IsChecked == true;
+                UpdateService.SaveSettings(settings);
+            };
+            checkNow.Click += async (s, e) => await UpdateService.CheckNowAsync(this);
             _explorer.Click += (s, e) =>
             {
                 if (_isUpdating) return;
@@ -302,6 +326,8 @@ namespace NeeView
                 _interval.SelectedItem = current;
 
                 _menuBar.IsChecked = !Config.Current.MenuBar.IsHideMenu;
+                _resume.IsChecked = Config.Current.StartUp.IsOpenLastBook;
+                _autoUpdate.IsChecked = UpdateService.LoadSettings().AutoCheck;
                 _explorer.IsChecked = ExplorerContextMenu.Current.IsEnabled;
                 _accessKey.Text = ExplorerContextMenu.Current.AccessKey;
                 _accessKey.IsEnabled = _explorer.IsChecked == true;
