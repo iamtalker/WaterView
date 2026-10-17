@@ -18,17 +18,22 @@
 
 ## 바뀐 점
 - 기본 읽기 방향: 왼쪽 → 오른쪽, 휠/방향키/Space/PageDown 으로 쪽 넘김
+- 화면 왼쪽을 클릭하면 왼쪽 방향으로, 오른쪽을 클릭하면 오른쪽 방향으로 넘어감 (읽는 방향이 오른쪽 → 왼쪽이면 왼쪽 클릭이 다음 쪽)
+- 아래쪽 쪽 이동 막대는 읽는 방향과 상관없이 항상 왼쪽 → 오른쪽, 손잡이(동그라미)는 작게
+- 시작할 때 마지막에 보던 책을 이어서 열기 (기본 켜짐). 이미 떠 있는 창에 파일을 열면 새 책이 뜬 뒤에 창을 앞으로 가져옴
+- 하나만 실행 / 여러 개 실행 선택 (F5 설정, 기본은 하나만)
+- 도움말의 '프로그램 정보'는 없앰 (`메뉴 > 업데이트 확인...` 으로 대신)
 - 우클릭 메뉴와 단축키 구성 변경 (열기 F2, 닫기 F4, 파일 정보 Tab, 설정 F5 등)
 - Enter: "이미지 선택" 창 (미리보기 + 파일 목록 + 정렬)
 - 어두운 회색 배경, 패널/슬라이더/주소창 기본 숨김
 - 상단 아이콘 도구 줄 (EXIF, 보기 모드, 슬라이드쇼, 책갈피, 편집, 항상 위에 표시, 메뉴)
-- 앱 이름 "물뷰", 새 아이콘
+- 앱 이름 "물뷰", 새 아이콘(물방울). 책이 없을 때 뜨던 환영 그림은 없앰
 
 ## 폴더 구성
 배포 zip 을 풀면 겉에는 `WaterView.exe` 하나만 보이고, 프로그램 본체와 라이브러리는 `app` 폴더 안에 있습니다. `WaterView.exe` 는 `WaterViewLauncher` 프로젝트로 만든 작은 실행기이며 `app\WaterView.exe` 를 시작합니다.
 
 ## 설정
-`F5` 는 자주 쓰는 항목(테마, 배경색, 읽는 방향, 슬라이드쇼 간격, 우클릭 메뉴 등록)만 모은 간단한 설정 창이고, 나머지 모든 설정은 `상세 설정...` 에서 바꿉니다.
+`F5` 는 자주 쓰는 항목(테마, 배경색, 읽는 방향, 슬라이드쇼 간격, 이어보기, 여러 개 실행, 자동 업데이트, 우클릭 메뉴 등록)만 모은 간단한 설정 창이고, 나머지 모든 설정은 `상세 설정...` 에서 바꿉니다.
 
 ## 업데이트
 시작할 때 하루 한 번 GitHub 의 최신 릴리스를 확인하고, 새 버전이 있으면 업데이트할지 물어봅니다. (`F5` 설정에서 끄거나 `메뉴 > 업데이트 확인...` 으로 직접 확인할 수 있습니다.)
@@ -50,6 +55,13 @@ dotnet build NeeView\NeeView.csproj -c Release
 dotnet publish NeeView\NeeView.csproj -c Release -r win-x64 --self-contained false -o publish
 ```
 겉의 `WaterView.exe` 실행기는 `WaterViewLauncher` 프로젝트(`dotnet build -c Release`)로 만들고, 위 `publish` 폴더 내용을 `app` 폴더에 넣어 함께 묶습니다.
+
+위 과정을 한 번에 해 주는 스크립트가 있습니다. 저장소 맨 위에 `WaterView.exe` + `app\` (릴리스와 같은 모습)를 만들고 `WaterView.zip` 까지 묶습니다.
+```
+powershell -ExecutionPolicy Bypass -File tools\make-package.ps1
+```
+아이콘(`NeeView\Resources\App.ico`)은 `tools\make-icon.ps1` 로 다시 그릴 수 있습니다.
+작업 메모는 [CLAUDE.md](CLAUDE.md) 에 있습니다.
 
 ## 라이선스
 MIT License (NeeView 의 `LICENSE.md` 를 그대로 유지합니다). 서드파티 라이선스는 `THIRDPARTY_LICENSES.md` 를 참고하세요.
