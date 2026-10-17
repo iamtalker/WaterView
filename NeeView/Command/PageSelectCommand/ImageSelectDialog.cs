@@ -116,7 +116,13 @@ namespace NeeView
                     Accept();
                     e.Handled = true;
                 }
+                else if (e.Key is Key.Up or Key.Down or Key.PageUp or Key.PageDown or Key.Home or Key.End)
+                {
+                    MoveSelection(e.Key);
+                    e.Handled = true;
+                }
             };
+            Loaded += (s, e) => FocusSelected();
             Closed += (s, e) => _previewCancellation?.Cancel();
 
             var current = pages.Count > 0 && currentIndex >= 0 && currentIndex < pages.Count ? pages[currentIndex] : null;
@@ -155,6 +161,37 @@ namespace NeeView
                 _list.SelectedItem = target;
                 _list.ScrollIntoView(target);
             }
+        }
+
+        private void MoveSelection(Key key)
+        {
+            var count = _list.Items.Count;
+            if (count == 0) return;
+
+            var index = _list.SelectedIndex < 0 ? 0 : _list.SelectedIndex;
+            var pageSize = 10;
+            index = key switch
+            {
+                Key.Up => index - 1,
+                Key.Down => index + 1,
+                Key.PageUp => index - pageSize,
+                Key.PageDown => index + pageSize,
+                Key.Home => 0,
+                _ => count - 1,
+            };
+            index = Math.Clamp(index, 0, count - 1);
+
+            _list.SelectedIndex = index;
+            _list.ScrollIntoView(_list.SelectedItem);
+            FocusSelected();
+        }
+
+        private void FocusSelected()
+        {
+            if (_list.SelectedItem is null) return;
+            _list.ScrollIntoView(_list.SelectedItem);
+            (_list.ItemContainerGenerator.ContainerFromItem(_list.SelectedItem) as ListViewItem)?.Focus();
+            if (!_list.IsKeyboardFocusWithin) _list.Focus();
         }
 
         private void Accept()
