@@ -30,11 +30,18 @@ dotnet build WaterViewLauncher\WaterViewLauncher.csproj -c Release -o <출력>
 - 자동 업데이트: `NeeView/Update/UpdateService.cs` + `WaterViewLauncher/Program.cs`(`--update`). 탐색기 우클릭 등록: `NeeView/System/ExplorerContextMenu.cs`.
 - 아이콘: `NeeView/Resources/App.ico` 는 `tools\make-icon.ps1` 로 그린다(물방울, System.Drawing).
 - 시작 지연 수정: `NeeView/System/MultiBootService.cs`.
+- 단축키 기본값(다음 권 `]`, 이전 권 `[`, 위/아래 비움): `CommandTable.CreateDefaultMemento`. 일본 만화식 방향키 반전: `RoutedCommandTable.SwapArrowKeyForReadOrder`. 막대 방향: `PageSelect/PageSlider/PageSlider.cs`.
+- 슬라이드쇼 전환(기본 0초): `Config/SlideShowConfig.cs`. 쪽 이동 막대 기본 표시: `Config/SliderConfig.cs`.
 
 ## 겪은 함정
 - `BackgroundConfig.CustomBackground` 는 객체를 **교체하지 말고 속성을 직접 수정**해야 화면에 반영된다 (감시 대상이 처음 객체).
 - 설정은 `app\Profile\UserSetting.json` 이고, 없으면 `.bak` 가 복원된다. 시험할 때 기본값을 보려면 둘 다 치울 것.
 - `NeeView.settings.json` 은 실행에 필요한 앱 파일(사용자 설정 아님). `PackageType` 은 `Zip`, `Watermark` 는 `false`.
+- **설정을 읽어 들이기 전에 `Config.Current` 를 만지면 안 된다** (`Config.SetCurrent` 가 한 번만 호출되는 구조라 그 전에 건드리면 기본 Config 가 만들어지고, 거기에 건 구독은 나중에 교체된 Config 에서 작동하지 않는다). 읽는 방향에 따른 방향키 반전(`RoutedCommandTable.EnsureReadOrderSubscription`)은 화면이 만들어질 때(`AddMouseInput`) 구독한다.
+- 쪽 이동 막대를 뒤집으면 NeeView 의 `CommandTools.IsCommandReversed` 가 쪽 넘김 명령을 자동으로 반전해 PageDown/Space 까지 거꾸로 간다 → 물뷰는 이 자동 반전을 끄고(항상 false) 방향키 좌우만 따로 바꾼다.
+- 책별 보기 설정 기억은 `BookSettingPolicyConfig` 기본값(Continue)으로 끈다. 읽던 쪽(`_page`)만 복원(이어보기).
+- 원격 호출(`AppRemoteCommandServer`)은 화면 스레드가 아닌 곳에서 받아야 한다. 화면 스레드에서 받으면 `Restart` 의 대기(최대 6초)가 책 여는 작업을 막아 하나만 실행 상태에서 책 전환이 6초 걸렸다.
+- 열어 둔(선택된) 패널은 `SidePanelAutoHideDescription.IsVisibleLocked` 가 true 를 돌려줘 자동 숨김으로 닫히지 않는다.
 - 한글이 든 파일을 `perl`/`sed` 로 고치면 깨질 수 있다 → UTF-8 을 다루는 도구로. PowerShell 5.1 스크립트에 한글이 있으면 UTF-8 **BOM** 으로 저장.
 - 이 PC 에는 Python 이 없다(스토어 스텁). 스크립트는 PowerShell/Bash/Node 로.
 - 언어 파일(`Languages/ko.restext`)에서 "NeeView"를 바꿀 때 `@#...OpenInNeeView` 같은 **키 참조**는 건드리지 말 것.
