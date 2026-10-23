@@ -9,16 +9,16 @@ namespace NeeView
     public partial class BookSettingPolicyConfig : ObservableObject, ICloneable
     {
         [DefaultEquality] private BookSettingPageSelectMode _page = BookSettingPageSelectMode.RestoreOrDefault;
-        [DefaultEquality] private BookSettingSelectMode _pageMode = BookSettingSelectMode.RestoreOrDefault;
-        [DefaultEquality] private BookSettingSelectMode _bookReadOrder = BookSettingSelectMode.RestoreOrContinue; // 물뷰: 처음 여는 책은 보던 읽는 방향을 이어간다 (다음 권으로 넘겨도 일본 만화식 유지)
-        [DefaultEquality] private BookSettingSelectMode _isSupportedDividePage = BookSettingSelectMode.RestoreOrDefault;
-        [DefaultEquality] private BookSettingSelectMode _isSupportedSingleFirstPage = BookSettingSelectMode.RestoreOrDefault;
-        [DefaultEquality] private BookSettingSelectMode _isSupportedSingleLastPage = BookSettingSelectMode.RestoreOrDefault;
-        [DefaultEquality] private BookSettingSelectMode _isSupportedWidePage = BookSettingSelectMode.RestoreOrDefault;
-        [DefaultEquality] private BookSettingSelectMode _isRecursiveFolder = BookSettingSelectMode.RestoreOrDefault;
-        [DefaultEquality] private BookSettingSelectMode _sortMode = BookSettingSelectMode.RestoreOrDefault;
-        [DefaultEquality] private BookSettingSelectMode _autoRotate = BookSettingSelectMode.RestoreOrContinue;
-        [DefaultEquality] private BookSettingSelectMode _baseScale = BookSettingSelectMode.RestoreOrDefault;
+        [DefaultEquality] private BookSettingSelectMode _pageMode = BookSettingSelectMode.Continue; // 물뷰: 한 쪽/두 쪽 보기는 책마다 기억하지 않고 지금 설정을 계속 쓴다
+        [DefaultEquality] private BookSettingSelectMode _bookReadOrder = BookSettingSelectMode.Continue; // 물뷰: 읽는 방향은 책마다 기억하지 않고 지금 설정을 계속 쓴다
+        [DefaultEquality] private BookSettingSelectMode _isSupportedDividePage = BookSettingSelectMode.Continue;
+        [DefaultEquality] private BookSettingSelectMode _isSupportedSingleFirstPage = BookSettingSelectMode.Continue;
+        [DefaultEquality] private BookSettingSelectMode _isSupportedSingleLastPage = BookSettingSelectMode.Continue;
+        [DefaultEquality] private BookSettingSelectMode _isSupportedWidePage = BookSettingSelectMode.Continue;
+        [DefaultEquality] private BookSettingSelectMode _isRecursiveFolder = BookSettingSelectMode.Continue;
+        [DefaultEquality] private BookSettingSelectMode _sortMode = BookSettingSelectMode.Continue;
+        [DefaultEquality] private BookSettingSelectMode _autoRotate = BookSettingSelectMode.Continue;
+        [DefaultEquality] private BookSettingSelectMode _baseScale = BookSettingSelectMode.Continue;
         [DefaultEquality] private BookSettingSelectMode _effectProfileId = BookSettingSelectMode.Continue;
 
         [PropertyMember]

@@ -11,7 +11,7 @@ namespace NeeView
     public partial class SliderConfig : ObservableObject
     {
         [IgnoreEquality] private bool _isVisible;
-        [DefaultEquality] private bool _isIsHidePageSlider = true;
+        [DefaultEquality] private bool _isIsHidePageSlider = false; // 물뷰: 평소에는 보이고, 전체화면(자동 숨김 모드)일 때만 숨긴다 (IsHidePageSliderInAutoHideMode)
         [DefaultEquality] private double _sliderOpacity = 1.0;
         [DefaultEquality] private SliderIndexLayout _sliderIndexLayout = SliderIndexLayout.Right;
         [DefaultEquality] private SliderDirection _sliderDirection = SliderDirection.SyncBookReadDirection;
