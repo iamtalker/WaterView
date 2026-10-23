@@ -20,7 +20,7 @@ namespace NeeView
         [DefaultEquality] private bool _isAutoScroll = true;
         [DefaultEquality] private PageEndAction _pageEndAction = PageEndAction.Loop;
         [DefaultEquality] private PageMoveType _pageMoveType = PageMoveType.Fade;
-        [DefaultEquality] private double _pageMoveDuration = 0.5;
+        [DefaultEquality] private double _pageMoveDuration = 0.0;
 
         /// <summary>
         /// ページ送りコマンド名

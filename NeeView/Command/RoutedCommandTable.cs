@@ -1,5 +1,6 @@
 ﻿//#define DEBUG_SHOWMESSAGE
 
+using NeeLaboratory.ComponentModel;
 using NeeLaboratory.Generators;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace NeeView
 
         private HashSet<Key> _usedKeyMap = new();
         private bool _isDirty = true;
+        private bool _isReadOrderReady;
         private List<EventHandler<KeyEventArgs>> _imeKeyHandlers = new();
         private readonly MouseWheelDelta _mouseVerticalWheelDelta = new();
         private readonly MouseWheelDelta _mouseHorizontalWheelDelta = new();
@@ -40,6 +42,23 @@ namespace NeeView
             // コマンド変更でショートカット変更
             CommandTable.Current.Changed += CommandTable_Changed;
 
+            UpdateInputGestures();
+        }
+
+        // 읽는 방향에 따라 방향키 연결을 바꾸기 위한 준비.
+        // NOTE: 설정을 읽어 들이기 전에 Config.Current 를 만지면 안 되므로 생성자가 아니라 화면이 만들어질 때 한 번만 한다
+        private void EnsureReadOrderSubscription()
+        {
+            if (_isReadOrderReady) return;
+            _isReadOrderReady = true;
+
+            Config.Current.BookSetting.SubscribePropertyChanged(nameof(BookSettingConfig.BookReadOrder), (s, e) =>
+            {
+                SetDirty();
+                UpdateInputGestures();
+            });
+
+            SetDirty();
             UpdateInputGestures();
         }
 
@@ -119,6 +138,8 @@ namespace NeeView
         public void AddMouseInput(MouseInput mouseInput)
         {
             if (_disposedValue) return;
+
+            EnsureReadOrderSubscription();
 
             _mouseInputCollection.Add(mouseInput);
             UpdateMouseInputGestures(mouseInput);
@@ -261,7 +282,8 @@ namespace NeeView
 
             foreach (var command in this.Commands)
             {
-                var inputGestures = CommandTable.Current.GetElement(command.Key).ShortCutKey.Gestures.OfType<KeyGestureSource>().Select(e => e.GetInputGesture());
+                var inputGestures = CommandTable.Current.GetElement(command.Key).ShortCutKey.Gestures.OfType<KeyGestureSource>()
+                    .Select(e => SwapArrowKeyForReadOrder(command.Key, e).GetInputGesture());
                 foreach (var gesture in inputGestures)
                 {
                     if (gesture.HasImeKey())
@@ -277,6 +299,21 @@ namespace NeeView
             UpdateUsedKeyMap();
         }
 
+
+        // 물뷰: 오른쪽 → 왼쪽(일본 만화식)으로 읽을 때는 쪽 넘김 방향키의 좌우를 바꾼다 (왼쪽 키가 다음 쪽)
+        private KeyGestureSource SwapArrowKeyForReadOrder(string commandName, KeyGestureSource source)
+        {
+            if (!_isReadOrderReady) return source;
+            if (commandName != "NextPage" && commandName != "PrevPage") return source;
+            if (Config.Current.BookSetting.BookReadOrder != PageReadOrder.RightToLeft) return source;
+
+            return source.Key switch
+            {
+                Key.Left => new KeyGestureSource(Key.Right, source.Modifiers),
+                Key.Right => new KeyGestureSource(Key.Left, source.Modifiers),
+                _ => source,
+            };
+        }
 
         // コマンドで使用されているキーマップ生成
         private void UpdateUsedKeyMap()

@@ -614,6 +614,13 @@ namespace NeeView
             {
                 e.Handled = true;
             }
+
+            // 물뷰: 아무 명령도 처리하지 않은 위/아래 키가 포커스를 메뉴 등으로 옮겨 메뉴가 활성화되는 것을 막는다
+            if (!e.Handled && (e.Key == Key.Up || e.Key == Key.Down) && Keyboard.Modifiers == ModifierKeys.None
+                && e.OriginalSource is not System.Windows.Controls.Primitives.TextBoxBase)
+            {
+                e.Handled = true;
+            }
         }
 
         private void MainWindow_PreviewMouseUp(object sender, MouseButtonEventArgs e)

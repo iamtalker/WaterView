@@ -95,6 +95,11 @@ namespace NeeView
             set { SetProperty(ref _isAutoHide, value); }
         }
 
+        /// <summary>
+        /// 열어 둔(선택된) 패널이 있는가
+        /// </summary>
+        public bool HasSelectedPanel => _dock.SelectedItem != null && _dock.SelectedItem.Any();
+
         // VisibleLock 条件
         // - v サイドバーアイコンドラッグ中
         // - パネルからのロック要求(項目名変更、コンテキストメニュー、ドラッグ等)
@@ -242,6 +247,12 @@ namespace NeeView
 
         public override bool IsVisibleLocked()
         {
+            // 물뷰: 열어 둔 패널은 쪽을 넘겨도 닫히지 않는다. 메뉴나 단축키로 닫을 때만 닫힌다
+            if (_self.HasSelectedPanel)
+            {
+                return true;
+            }
+
             var targetElement = ContextMenuWatcher.TargetElement;
             if (targetElement != null)
             {

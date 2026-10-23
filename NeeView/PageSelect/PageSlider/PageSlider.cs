@@ -171,8 +171,8 @@ namespace NeeView
         // スライダー方向更新
         private void UpdateIsSliderDirectionReversed()
         {
-            // 물뷰: 읽는 방향(일본식/한국식)과 상관없이 막대는 항상 왼쪽에서 오른쪽으로 간다
-            IsSliderDirectionReversed = false;
+            // 물뷰: 읽는 방향이 오른쪽 → 왼쪽(일본 만화식)일 때만 막대도 오른쪽에서 왼쪽으로 간다
+            IsSliderDirectionReversed = Config.Current.BookSetting.BookReadOrder == PageReadOrder.RightToLeft;
         }
 
         /// <summary>

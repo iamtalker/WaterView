@@ -153,8 +153,9 @@ namespace NeeView
         /// <returns>コマンド反転許可かつページスライダーが右向きならば真</returns>
         public static bool IsCommandReversed()
         {
-            return Config.Current.Command.IsReversePageMove
-                && MainWindowModel.Current.IsLeftToRightSlider() != (Config.Current.Command.PresetPageReadOrder != PageReadOrder.RightToLeft);
+            // 물뷰: 막대 방향에 따른 명령 자동 반전은 쓰지 않는다.
+            // (켜 두면 일본 만화식에서 막대가 뒤집힐 때 PageDown/Space 까지 거꾸로 움직인다. 방향키 좌우 반전은 RoutedCommandTable 에서 따로 한다)
+            return false;
         }
     }
 }

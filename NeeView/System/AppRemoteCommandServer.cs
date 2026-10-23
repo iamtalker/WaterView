@@ -45,7 +45,10 @@ namespace NeeView
             if (_task is not null) return;
 
             _cancellationTokenSource = new();
-            _task = StartAsync(_cancellationTokenSource.Token);
+            // 물뷰: 화면 스레드가 아닌 곳에서 요청을 받는다. 화면 스레드에서 받으면 Restart 의 대기가
+            // 책을 여는 작업(화면 스레드)을 6초 동안 막아 책 전환이 6초 걸렸다.
+            var token = _cancellationTokenSource.Token;
+            _task = Task.Run(() => StartAsync(token));
         }
 
         public void Stop()

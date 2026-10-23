@@ -717,6 +717,17 @@ namespace NeeView
             memento["PrevPage"].ShortCutKey = "Left,WheelUp,Back,PageUp";
             memento["OpenContextMenu"].ShortCutKey = "RightClick";
             memento["PrevHistoryPage"].ShortCutKey = "";
+
+            // 위/아래 방향키는 어떤 명령에도 연결하지 않는다 (사용자가 직접 정함). 다음 권/이전 권은 ] [
+            foreach (var element in memento.Values)
+            {
+                var keys = (element.ShortCutKey ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Where(e => e != "Up" && e != "Down");
+                element.ShortCutKey = string.Join(",", keys);
+            }
+            memento["NextBook"].ShortCutKey = "OemCloseBrackets";
+            memento["PrevBook"].ShortCutKey = "OemOpenBrackets";
+
             AddShortCutKey(memento, "FirstPage", "Home");
             AddShortCutKey(memento, "LastPage", "End");
             AddShortCutKey(memento, "LoadAs", "F2");
