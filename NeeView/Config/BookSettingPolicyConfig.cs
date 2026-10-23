@@ -10,7 +10,7 @@ namespace NeeView
     {
         [DefaultEquality] private BookSettingPageSelectMode _page = BookSettingPageSelectMode.RestoreOrDefault;
         [DefaultEquality] private BookSettingSelectMode _pageMode = BookSettingSelectMode.RestoreOrDefault;
-        [DefaultEquality] private BookSettingSelectMode _bookReadOrder = BookSettingSelectMode.RestoreOrDefault;
+        [DefaultEquality] private BookSettingSelectMode _bookReadOrder = BookSettingSelectMode.RestoreOrContinue; // 물뷰: 처음 여는 책은 보던 읽는 방향을 이어간다 (다음 권으로 넘겨도 일본 만화식 유지)
         [DefaultEquality] private BookSettingSelectMode _isSupportedDividePage = BookSettingSelectMode.RestoreOrDefault;
         [DefaultEquality] private BookSettingSelectMode _isSupportedSingleFirstPage = BookSettingSelectMode.RestoreOrDefault;
         [DefaultEquality] private BookSettingSelectMode _isSupportedSingleLastPage = BookSettingSelectMode.RestoreOrDefault;
