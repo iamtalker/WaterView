@@ -9,7 +9,7 @@ namespace NeeView
     [Equatable(Explicit = true, IgnoreInheritedMembers = true)]
     public partial class MediaArchiveConfig : ObservableObject, IMediaContext
     {
-        public static FileTypeCollection DefaultSupportFileTypes { get; } = new FileTypeCollection(".asf;.avi;.mp4;.mkv;.mov;.wmv");
+        public static FileTypeCollection DefaultSupportFileTypes { get; } = new FileTypeCollection(".asf;.avi;.mp3;.mp4;.mkv;.mov;.wmv");
 
 
         [DefaultEquality] private bool _isEnabled = true;
