@@ -31,17 +31,17 @@ namespace NeeView
         private readonly TextBox _accessKey = new() { Width = 40, MaxLength = 1, HorizontalAlignment = HorizontalAlignment.Left };
 
         private readonly List<(string Label, ThemeSource Source)> _themeChoices = new();
-        private List<BackgroundPreset> _colorChoices = new();
+        private readonly List<(string Label, Color? Color, BackgroundType? Type)> _colorItems = new();
 
+        // 간단 설정에 보여 줄 테마와 배경색 (나머지는 상세 설정과 편집 창에서)
         private static readonly (string Label, ThemeType Type)[] _builtInThemes =
         {
             ("어두운 테마", ThemeType.Dark),
             ("밝은 테마", ThemeType.Light),
-            ("어두운 흑백", ThemeType.DarkMonochrome),
-            ("밝은 흑백", ThemeType.LightMonochrome),
-            ("고대비", ThemeType.HighContrast),
             ("시스템 설정 따르기", ThemeType.System),
         };
+
+        private static readonly string[] _shownColorNames = { "검정", "흰색", "남색" };
 
         private QuickSettingsDialog()
         {
@@ -163,18 +163,15 @@ namespace NeeView
             _background.SelectionChanged += (s, e) =>
             {
                 if (_isUpdating || _background.SelectedIndex < 0) return;
-                var index = _background.SelectedIndex;
-                if (index < _colorChoices.Count)
+                if (_background.SelectedIndex >= _colorItems.Count) return;
+                var item = _colorItems[_background.SelectedIndex];
+                if (item.Color is Color color)
                 {
-                    BackgroundPresetList.Apply(_colorChoices[index].Color);
+                    BackgroundPresetList.Apply(color);
                 }
-                else if (index == _colorChoices.Count)
+                else if (item.Type is BackgroundType type)
                 {
-                    Config.Current.Background.BackgroundType = BackgroundType.Check;
-                }
-                else
-                {
-                    Config.Current.Background.BackgroundType = BackgroundType.Auto;
+                    Config.Current.Background.BackgroundType = type;
                 }
             };
             editBackground.Click += (s, e) =>
@@ -280,45 +277,55 @@ namespace NeeView
             _isUpdating = true;
             try
             {
-                // themes: built-in + custom
+                // themes: built-in only (custom themes are edited in the theme editor)
                 _themeChoices.Clear();
                 foreach (var (label, type) in _builtInThemes)
                 {
                     _themeChoices.Add((label, new ThemeSource(type)));
                 }
-                foreach (var custom in CustomThemeList.Load())
+                var currentTheme = Config.Current.Theme.ThemeType;
+                if (!_themeChoices.Any(e => e.Source.Equals(currentTheme)))
                 {
-                    _themeChoices.Add((custom.Name, new ThemeSource(ThemeType.Custom, custom.Name + ".json")));
+                    // 현재 설정이 목록에 없으면 그대로 표시한다
+                    _themeChoices.Add(("현재 테마", currentTheme));
                 }
                 _theme.Items.Clear();
                 foreach (var choice in _themeChoices) _theme.Items.Add(choice.Label);
-                _theme.SelectedIndex = _themeChoices.FindIndex(e => e.Source.Equals(Config.Current.Theme.ThemeType));
+                _theme.SelectedIndex = _themeChoices.FindIndex(e => e.Source.Equals(currentTheme));
 
-                // background colors: presets + checker + auto
-                _colorChoices = BackgroundPresetList.Load();
-                _background.Items.Clear();
-                foreach (var preset in _colorChoices) _background.Items.Add(preset.Name);
-                _background.Items.Add("체크무늬");
-                _background.Items.Add("이미지에 맞춤(자동)");
+                // background: 검정 / 흰색 / 남색 only, plus the current state if it is not one of them
+                _colorItems.Clear();
+                foreach (var preset in BackgroundPresetList.Load().Where(e => _shownColorNames.Contains(e.Name)))
+                {
+                    _colorItems.Add((preset.Name, preset.Color, null));
+                }
 
+                int selectedColor = -1;
                 var backgroundType = Config.Current.Background.BackgroundType;
                 if (backgroundType == BackgroundType.Custom)
                 {
                     var color = Config.Current.Background.CustomBackground.Color;
-                    _background.SelectedIndex = _colorChoices.FindIndex(e => e.Color == color);
+                    selectedColor = _colorItems.FindIndex(e => e.Color == color);
+                    if (selectedColor < 0)
+                    {
+                        _colorItems.Add(("현재 색", color, null));
+                        selectedColor = _colorItems.Count - 1;
+                    }
                 }
                 else if (backgroundType == BackgroundType.Check)
                 {
-                    _background.SelectedIndex = _colorChoices.Count;
+                    _colorItems.Add(("체크무늬", null, BackgroundType.Check));
+                    selectedColor = _colorItems.Count - 1;
                 }
                 else if (backgroundType == BackgroundType.Auto)
                 {
-                    _background.SelectedIndex = _colorChoices.Count + 1;
+                    _colorItems.Add(("이미지에 맞춤(자동)", null, BackgroundType.Auto));
+                    selectedColor = _colorItems.Count - 1;
                 }
-                else
-                {
-                    _background.SelectedIndex = -1;
-                }
+
+                _background.Items.Clear();
+                foreach (var item in _colorItems) _background.Items.Add(item.Label);
+                _background.SelectedIndex = selectedColor;
 
                 _readOrder.SelectedIndex = BookSettings.Current.BookReadOrder == PageReadOrder.LeftToRight ? 0 : 1;
                 _pageMode.SelectedIndex = BookSettings.Current.PageMode == PageMode.WidePage ? 1 : 0;
