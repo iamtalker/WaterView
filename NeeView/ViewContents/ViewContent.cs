@@ -341,6 +341,7 @@ namespace NeeView
                 MediaViewData _ => new MediaViewContentStrategy(this),
                 ArchiveViewData => new ArchiveViewContentStrategy(this),
                 FileViewData => new FileViewContentStrategy(this),
+                TextViewData => new TextViewContentStrategy(this),
                 EmptyViewData => new EmptyViewContentStrategy(this),
                 _ => throw new NotSupportedException(),
             };

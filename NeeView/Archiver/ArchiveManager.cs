@@ -153,7 +153,6 @@ namespace NeeView
             {
                 order.Add(ArchiveType.MediaArchive);
             }
-
             if (Config.Current.Susie.IsEnabled)
             {
                 if (Config.Current.Susie.IsFirstOrderSusieArchive)
@@ -202,7 +201,6 @@ namespace NeeView
                     yield return ext;
                 }
             }
-
             if (Config.Current.Susie.IsEnabled)
             {
                 foreach (var ext in _supportedFileTypes[ArchiveType.SusieArchive].Items)
@@ -215,6 +213,8 @@ namespace NeeView
             {
                 yield return ext;
             }
+
+            yield return ".txt";
         }
 
         // アーカイバを指定してサポートしているかを判定
@@ -409,6 +409,10 @@ namespace NeeView
             }
             else
             {
+                if (LoosePath.GetExtension(path) == ".txt")
+                {
+                    return new TextArchive(path, source, archiveHint);
+                }
                 return CreateArchive(GetSupportedType(path, archiveHint), path, source, archiveHint);
             }
         }

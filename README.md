@@ -38,11 +38,14 @@
 
 - 이미지: JPG, JPEG, PNG, GIF, WEBP, BMP, TIFF, SVG 등
 - 압축파일·만화: ZIP, RAR, 7Z, LZH, CBZ, CBR, CB7, CBT
-- 문서: PDF
+- 문서·텍스트: PDF, TXT
 - 동영상: MP4, MKV, AVI, MOV, WMV, ASF
 - 음악: MP3
 
 동영상과 음악은 Windows 또는 VLC의 코덱·재생 환경에 따라 지원 범위가 달라질 수 있습니다.
+
+## 로드맵
+- 안드로이드용 올인원 뷰어 개발: 이미지·압축 만화·PDF·텍스트·동영상·음악을 한 앱에서 볼 수 있도록 확장
 
 ## 폴더 구성
 배포 zip 을 풀면 겉에는 `WaterView.exe` 하나만 보이고, 프로그램 본체와 라이브러리는 `app` 폴더 안에 있습니다. `WaterView.exe` 는 `WaterViewLauncher` 프로젝트로 만든 작은 실행기이며 `app\WaterView.exe` 를 시작합니다.

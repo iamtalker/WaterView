@@ -44,7 +44,6 @@
     <Grid x:Name="Root" KeyDown="Control_KeyDown_IgnoreSingleKeyGesture" MinHeight="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <DockPanel x:Name="MenuBarArea" LastChildFill="True" Margin="0,0,0,2">
@@ -77,14 +76,6 @@
             </DockPanel>
 
         </DockPanel>
-        <Border Grid.Row="1" Padding="13,5,13,6" BorderThickness="0,1,0,0"
-                BorderBrush="{DynamicResource MenuBar.Border}" IsHitTestVisible="False">
-            <TextBlock FontSize="11" Opacity="0.7" TextTrimming="CharacterEllipsis"
-                       ToolTip="이미지 JPG · JPEG · PNG · GIF · WEBP · BMP · TIFF · SVG 외 / 압축 ZIP · RAR · 7Z · LZH · CBZ · CBR · CB7 · CBT / 문서 PDF / 동영상 MP4 · MKV · AVI · MOV · WMV · ASF / 음악 MP3">
-                <Run Text="지원 형식" FontWeight="SemiBold" />
-                <Run Text="   이미지 JPG · PNG · GIF · WEBP 외     /     압축 ZIP · RAR · 7Z · CBZ 외     /     문서 PDF     /     동영상 MP4 · MKV · AVI · MOV · WMV · ASF     /     음악 MP3" />
-            </TextBlock>
-        </Border>
     </Grid>
 
 </UserControl>

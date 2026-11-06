@@ -19,7 +19,11 @@ namespace NeeView
             token.ThrowIfCancellationRequested();
 
             var path = entry.TargetPath;
-            if (entry.IsImage())
+            if (entry.IsText())
+            {
+                return new TextPageContent(entry, _bookMemoryService);
+            }
+            else if (entry.IsImage())
             {
                 if (entry.Archive is MediaArchive)
                 {

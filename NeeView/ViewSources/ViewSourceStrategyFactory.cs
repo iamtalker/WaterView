@@ -23,6 +23,7 @@ namespace NeeView
                 SvgPageData => new SvgViewSourceStrategy(archiveEntry, pictureInfo),
                 ArchivePageData => new ArchiveViewSourceStrategy(),
                 FilePageData => new FileViewSourceStrategy(),
+                TextPageData => new TextViewSourceStrategy(),
                 EmptyPageData => new EmptyViewSourceStrategy(),
                 _ => throw new NotSupportedException(),
             };

@@ -438,7 +438,7 @@ namespace NeeView
                 return true;
             }
 
-            return IsArchiveSupported(false, true);
+            return IsText() || IsArchiveSupported(false, true);
         }
 
         /// <summary>
@@ -471,13 +471,18 @@ namespace NeeView
             return !this.IsDirectory && GetArchiveSupportedType() == ArchiveType.MediaArchive;
         }
 
+        public bool IsText()
+        {
+            return !this.IsDirectory && string.Equals(LoosePath.GetExtension(TargetPath), ".txt", StringComparison.OrdinalIgnoreCase);
+        }
+
         /// <summary>
         /// このエントリが画像であるか拡張子から判定。
         /// MediaArchive は無条件で画像と認識
         /// </summary>
         public bool IsImage(bool includeMedia = true)
         {
-            return !this.IsDirectory && ((this.Archive is MediaArchive) || PictureProfile.Current.IsSupported(TargetPath, includeMedia));
+            return !this.IsDirectory && (IsText() || (this.Archive is MediaArchive) || PictureProfile.Current.IsSupported(TargetPath, includeMedia));
         }
 
         /// <summary>

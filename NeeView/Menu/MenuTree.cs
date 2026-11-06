@@ -242,6 +242,7 @@ namespace NeeView
                     new TreeListNode<MenuElement>(new CommandMenuElement() { CommandName = "HelpCommandList" }),
                     new TreeListNode<MenuElement>(new CommandMenuElement() { CommandName = "HelpScript" }),
                     new TreeListNode<MenuElement>(new CommandMenuElement() { CommandName = "HelpSearchOption" }),
+                    new TreeListNode<MenuElement>(new CommandMenuElement() { CommandName = "HelpSupportedFormats" }),
                 }
             };
 
