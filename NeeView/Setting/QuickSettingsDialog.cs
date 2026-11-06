@@ -41,8 +41,6 @@ namespace NeeView
             ("시스템 설정 따르기", ThemeType.System),
         };
 
-        private static readonly string[] _shownColorNames = { "검정", "흰색", "남색" };
-
         private QuickSettingsDialog()
         {
             Title = "설정";
@@ -277,11 +275,15 @@ namespace NeeView
             _isUpdating = true;
             try
             {
-                // themes: built-in only (custom themes are edited in the theme editor)
+                // themes: built-in + the user's own themes (the list is edited with the 편집 button)
                 _themeChoices.Clear();
                 foreach (var (label, type) in _builtInThemes)
                 {
                     _themeChoices.Add((label, new ThemeSource(type)));
+                }
+                foreach (var custom in CustomThemeList.Load())
+                {
+                    _themeChoices.Add((custom.Name, new ThemeSource(ThemeType.Custom, custom.Name + ".json")));
                 }
                 var currentTheme = Config.Current.Theme.ThemeType;
                 if (!_themeChoices.Any(e => e.Source.Equals(currentTheme)))
@@ -293,9 +295,9 @@ namespace NeeView
                 foreach (var choice in _themeChoices) _theme.Items.Add(choice.Label);
                 _theme.SelectedIndex = _themeChoices.FindIndex(e => e.Source.Equals(currentTheme));
 
-                // background: 검정 / 흰색 / 남색 only, plus the current state if it is not one of them
+                // background: the saved preset list (edited with the 편집 button), plus the current state if it is not in it
                 _colorItems.Clear();
-                foreach (var preset in BackgroundPresetList.Load().Where(e => _shownColorNames.Contains(e.Name)))
+                foreach (var preset in BackgroundPresetList.Load())
                 {
                     _colorItems.Add((preset.Name, preset.Color, null));
                 }

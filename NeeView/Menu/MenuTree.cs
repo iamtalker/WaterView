@@ -238,6 +238,7 @@ namespace NeeView
                 },
                 new TreeListNode<MenuElement>(new GroupMenuElement() { Name = TextResources.GetString("MenuTree.Help") })
                 {
+                    new TreeListNode<MenuElement>(new CommandMenuElement() { CommandName = "HelpIntro" }),
                     new TreeListNode<MenuElement>(new CommandMenuElement() { CommandName = "HelpMainMenu" }),
                     new TreeListNode<MenuElement>(new CommandMenuElement() { CommandName = "HelpCommandList" }),
                     new TreeListNode<MenuElement>(new CommandMenuElement() { CommandName = "HelpScript" }),

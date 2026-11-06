@@ -149,14 +149,9 @@ namespace NeeView
 
         public static IReadOnlyList<BackgroundPreset> Defaults { get; } = new[]
         {
-            new BackgroundPreset("어두운 회색", Color.FromRgb(0x20, 0x20, 0x20)),
             new BackgroundPreset("검정", Color.FromRgb(0x00, 0x00, 0x00)),
-            new BackgroundPreset("회색", Color.FromRgb(0x80, 0x80, 0x80)),
-            new BackgroundPreset("밝은 회색", Color.FromRgb(0xD3, 0xD3, 0xD3)),
             new BackgroundPreset("흰색", Color.FromRgb(0xFF, 0xFF, 0xFF)),
-            new BackgroundPreset("베이지", Color.FromRgb(0xF2, 0xE8, 0xD0)),
-            new BackgroundPreset("남색", Color.FromRgb(0x1B, 0x25, 0x3F)),
-            new BackgroundPreset("녹색", Color.FromRgb(0x1F, 0x3B, 0x2E)),
+            new BackgroundPreset("청색", Color.FromRgb(0x14, 0x37, 0x5A)),
         };
 
         public static List<BackgroundPreset> Load()
