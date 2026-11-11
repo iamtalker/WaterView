@@ -39,7 +39,7 @@
 
 - 이미지: JPG, JPEG, PNG, GIF, WEBP, BMP, TIFF, SVG 등
 - 압축파일·만화: ZIP, RAR, 7Z, LZH, CBZ, CBR, CB7, CBT
-- 문서·텍스트: PDF, TXT
+- 문서·텍스트: PDF, TXT, EPUB (EPUB 은 본문 순서대로 한 장씩 넘기며, WebView2 런타임이 필요합니다)
 - 동영상: MP4, MKV, AVI, MOV, WMV, ASF
 - 음악: MP3
 

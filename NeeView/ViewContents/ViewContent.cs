@@ -342,6 +342,7 @@ namespace NeeView
                 ArchiveViewData => new ArchiveViewContentStrategy(this),
                 FileViewData => new FileViewContentStrategy(this),
                 TextViewData => new TextViewContentStrategy(this),
+                EpubViewData => new EpubViewContentStrategy(this),
                 EmptyViewData => new EmptyViewContentStrategy(this),
                 _ => throw new NotSupportedException(),
             };

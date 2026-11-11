@@ -24,6 +24,7 @@ namespace NeeView
                 ArchivePageData => new ArchiveViewSourceStrategy(),
                 FilePageData => new FileViewSourceStrategy(),
                 TextPageData => new TextViewSourceStrategy(),
+                EpubPageData => new EpubViewSourceStrategy(),
                 EmptyPageData => new EmptyViewSourceStrategy(),
                 _ => throw new NotSupportedException(),
             };

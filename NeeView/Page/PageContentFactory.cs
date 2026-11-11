@@ -19,7 +19,11 @@ namespace NeeView
             token.ThrowIfCancellationRequested();
 
             var path = entry.TargetPath;
-            if (entry.IsText())
+            if (entry.Archive is EpubArchive)
+            {
+                return new EpubPageContent(entry, _bookMemoryService);
+            }
+            else if (entry.IsText())
             {
                 return new TextPageContent(entry, _bookMemoryService);
             }

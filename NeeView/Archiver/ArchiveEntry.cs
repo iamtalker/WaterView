@@ -438,7 +438,15 @@ namespace NeeView
                 return true;
             }
 
-            return IsText() || IsArchiveSupported(false, true);
+            return IsText() || IsEpub() || IsArchiveSupported(false, true);
+        }
+
+        /// <summary>
+        /// EPUB 전자책 파일인가 (ArchiveType 에 매핑되지 않으므로 확장자로 판정)
+        /// </summary>
+        public bool IsEpub()
+        {
+            return !this.IsDirectory && string.Equals(LoosePath.GetExtension(TargetPath), ".epub", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -482,7 +490,7 @@ namespace NeeView
         /// </summary>
         public bool IsImage(bool includeMedia = true)
         {
-            return !this.IsDirectory && (IsText() || (this.Archive is MediaArchive) || PictureProfile.Current.IsSupported(TargetPath, includeMedia));
+            return !this.IsDirectory && (IsText() || (this.Archive is EpubArchive) || (this.Archive is MediaArchive) || PictureProfile.Current.IsSupported(TargetPath, includeMedia));
         }
 
         /// <summary>

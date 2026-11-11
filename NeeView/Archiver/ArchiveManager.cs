@@ -215,6 +215,7 @@ namespace NeeView
             }
 
             yield return ".txt";
+            yield return ".epub";
         }
 
         // アーカイバを指定してサポートしているかを判定
@@ -412,6 +413,10 @@ namespace NeeView
                 if (LoosePath.GetExtension(path) == ".txt")
                 {
                     return new TextArchive(path, source, archiveHint);
+                }
+                if (LoosePath.GetExtension(path) == ".epub")
+                {
+                    return new EpubArchive(path, source, archiveHint);
                 }
                 return CreateArchive(GetSupportedType(path, archiveHint), path, source, archiveHint);
             }

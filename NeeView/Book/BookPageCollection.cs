@@ -343,6 +343,12 @@ namespace NeeView
                 //Debug.WriteLine($"Sort {sortMode} ...");
                 var pages = SearchPages(_sourcePages, searchKeyword, token);
 
+                // EPUB 은 책의 본문 순서(spine)를 그대로 쓴다. 이름순으로 정렬하면 nav 문서가 표지보다 앞에 온다.
+                if (_sourcePages[0].ArchiveEntry.Archive is EpubArchive)
+                {
+                    sortMode = PageSortMode.Entry;
+                }
+
                 var sortResult = BookPageSort.Sort(pages, sortMode, sortSeed, token);
                 Pages = sortResult.Any() ? sortResult.Pages : [_emptyPage];
                 _sortSeed = sortResult.SortSeed;
