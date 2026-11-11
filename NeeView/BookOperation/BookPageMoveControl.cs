@@ -25,11 +25,20 @@ namespace NeeView
 
         public void MovePrev(object? sender)
         {
+            // EPUB 은 장 안을 먼저 한 화면씩 스크롤하고, 장 끝에서만 앞 장으로 넘어간다
+            if (EpubPageControl.TryStep(LinkedListDirection.Previous, () => _box.MoveToNextFrame(LinkedListDirection.Previous)))
+            {
+                return;
+            }
             _box.MoveToNextFrame(LinkedListDirection.Previous);
         }
 
         public void MoveNext(object? sender)
         {
+            if (EpubPageControl.TryStep(LinkedListDirection.Next, () => _box.MoveToNextFrame(LinkedListDirection.Next)))
+            {
+                return;
+            }
             _box.MoveToNextFrame(LinkedListDirection.Next);
         }
 
