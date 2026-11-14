@@ -349,6 +349,7 @@ namespace NeeView
                 new HelpMainMenuCommand(),
                 new HelpSearchOptionCommand(),
                 new HelpIntroCommand(),
+                new HelpBookCommand(),
                 new HelpSupportedFormatsCommand(),
                 new OpenContextMenuCommand(),
 

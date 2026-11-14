@@ -118,9 +118,11 @@ namespace NeeView
             AddRow("우클릭 메뉴 단축키", keyPanel);
 
             var detail = new Button { Content = "상세 설정...", Padding = new Thickness(14, 4, 14, 4), Margin = new Thickness(0, 0, 8, 0) };
+            var book = new Button { Content = "책 소개", Padding = new Thickness(14, 4, 14, 4), Margin = new Thickness(0, 0, 8, 0) };
             var close = new Button { Content = "닫기", Padding = new Thickness(14, 4, 14, 4), IsDefault = true, IsCancel = true };
             var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(16, 4, 16, 14) };
             buttons.Children.Add(detail);
+            buttons.Children.Add(book);
             buttons.Children.Add(close);
 
             var hint = new TextBlock
@@ -247,6 +249,7 @@ namespace NeeView
                 }
             };
             detail.Click += (s, e) => MainWindowModel.Current.OpenSettingWindow();
+            book.Click += (s, e) => ExternalProcess.Start(HelpBookCommand.BookUrl);
             close.Click += (s, e) => Close();
 
             Closed += (s, e) => _current = null;
